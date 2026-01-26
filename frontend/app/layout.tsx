@@ -1,24 +1,36 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-import { Providers } from './providers';
+import type { Metadata } from "next";
+import { Roboto, Poppins } from "next/font/google"; // Import Font
+import "./globals.css";
+import { Providers } from "./providers";
+import '@coinbase/onchainkit/styles.css';
 
-const inter = Inter({ subsets: ['latin'] });
+// Setup Font Config
+const roboto = Roboto({ 
+  subsets: ["latin"], 
+  weight: ["400", "500", "700"],
+  variable: "--font-roboto",
+});
+
+const poppins = Poppins({ 
+  subsets: ["latin"], 
+  weight: ["400", "600"],
+  variable: "--font-poppins",
+});
 
 export const metadata: Metadata = {
-  title: 'HookLab AI - Generate Viral Farcaster Hooks',
-  description: 'AI-powered hook generation using real Base channel trends. Blind selection mechanism with onchain premium subscriptions.',
-  keywords: ['Farcaster', 'Base', 'AI', 'Web3', 'Hooks', 'Content Creation'],
+  title: "HookLab AI",
+  description: "Generate viral hooks on Base",
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      {/* Masukkan variabel font ke body */}
+      <body className={`${roboto.variable} ${poppins.variable} font-sans bg-black`}>
         <Providers>{children}</Providers>
       </body>
     </html>

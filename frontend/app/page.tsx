@@ -1,195 +1,70 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount } from 'wagmi';
-import WalletConnect from './components/WalletConnect';
-import TopicSelector from './components/TopicSelector';
-import HookSelector from './components/HookSelector';
-import ContentReveal from './components/ContentReveal';
-import SubscribeButton from './components/SubscribeButton';
-
-type AppState = 'connect' | 'topic' | 'hooks' | 'content';
+import Image from 'next/image';
+import UIBackground from './components/UIBackground';
+import BottomInputCard from './components/BottomInputCard';
+import WalletConnect from './components/WalletConnect'; // Pastikan import ini ada
 
 export default function Home() {
-  const { address, isConnected } = useAccount();
-  const [appState, setAppState] = useState<AppState>('connect');
-  const [topic, setTopic] = useState('');
-  const [hooks, setHooks] = useState<any[]>([]);
-  const [selectedHook, setSelectedHook] = useState('');
-  const [fullContent, setFullContent] = useState('');
-  const [quota, setQuota] = useState<number | null>(null);
-  const [isPremium, setIsPremium] = useState(false);
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
 
-  // Handle wallet connection
-  const handleConnected = () => {
-    setAppState('topic');
-    fetchQuota();
-  };
-
-  // Fetch user quota
-  const fetchQuota = async () => {
-    if (!address) return;
-
-    try {
-      const response = await fetch(`/api/quota?walletAddress=${address}`);
-      const data = await response.json();
-      setQuota(data.remainingCredits);
-      setIsPremium(data.isPremium);
-    } catch (error) {
-      console.error('Error fetching quota:', error);
-    }
-  };
-
-  // Handle topic selection
-  const handleTopicSelected = (selectedTopic: string, generatedHooks: any[]) => {
-    setTopic(selectedTopic);
-    setHooks(generatedHooks);
-    setAppState('hooks');
-  };
-
-  // Handle hook selection
-  const handleHookSelected = (hook: string, content: string) => {
-    setSelectedHook(hook);
-    setFullContent(content);
-    setAppState('content');
-    fetchQuota(); // Refresh quota after selection
-  };
-
-  // Handle reset
-  const handleReset = () => {
-    setTopic('');
-    setHooks([]);
-    setSelectedHook('');
-    setFullContent('');
-    setAppState('topic');
-    fetchQuota();
+  const handleWalletConnected = () => {
+    console.log("Wallet Connected!");
+    setIsWalletConnected(true);
+    // Disini nanti logika pindah halaman
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a] text-white">
-      {/* Header */}
-      <header className="border-b border-[#2a2a2a] bg-[#0a0a0a]/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold gradient-text">HookLab AI</h1>
-            <p className="text-sm text-gray-400">Powered by Base & Farcaster</p>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            {isConnected && (
-              <div className="text-right">
-                <p className="text-sm text-gray-400">
-                  {isPremium ? (
-                    <span className="text-[#00d395] font-semibold">Premium ✨</span>
-                  ) : (
-                    <span>
-                      Credits: <span className="font-semibold">{quota ?? '...'}</span>
-                    </span>
-                  )}
-                </p>
-              </div>
-            )}
-            
-            {isConnected && !isPremium && <SubscribeButton onSuccess={fetchQuota} />}
-            
-            <WalletConnect onConnected={handleConnected} />
-          </div>
-        </div>
-      </header>
+    <main className="flex min-h-screen flex-col items-center justify-center bg-black">
+      <div className="relative w-full max-w-[400px] h-[844px] bg-[#0A0A0A] overflow-hidden shadow-2xl flex flex-col font-roboto">
+        
+        <UIBackground />
 
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        {/* Hero Section */}
-        {appState === 'connect' && (
-          <div className="text-center space-y-6 py-20">
-            <h2 className="text-5xl font-bold leading-tight">
-              Generate Viral{' '}
-              <span className="gradient-text">Farcaster Hooks</span>
-            </h2>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-              AI-powered hook generation using real Base channel trends.
-              Blind selection mechanism ensures authentic engagement.
+        <div className="relative z-10 flex-1 flex flex-col h-full">
+          {/* Header */}
+          <div className="mt-12 px-6 flex flex-col items-start gap-4">
+             <div className="flex items-center gap-3">
+               <div className="relative w-10 h-10 rounded-full overflow-hidden">
+                 <Image 
+                   src="/logo_hooklab.jpg" 
+                   alt="Logo HookLab" 
+                   fill 
+                   className="object-cover"
+                 />
+               </div>
+               <span className="text-white font-bold text-xl font-poppins tracking-wide">
+                 HookLab AI
+               </span>
+             </div>
+             {/* Tombol Wallet Connect di Header (Opsional, kalau mau ada di atas juga) */}
+             <div className="absolute top-12 right-6">
+                {/* <WalletConnect onConnected={handleWalletConnected} /> */}
+             </div>
+          </div>
+
+          {/* Tengah */}
+          <div className="flex-1 flex flex-col items-center justify-center -mt-20">
+            <p className="text-white/60 text-sm mb-3 font-medium tracking-wide">
+              AI assistant
             </p>
-            
-            <div className="pt-8">
-              <WalletConnect onConnected={handleConnected} />
-            </div>
+            <h1 className="text-white text-3xl font-bold text-center leading-snug font-poppins drop-shadow-2xl">
+              Please Connect <br />
+              Wallet, First !
+            </h1>
+          </div>
 
-            {/* Features */}
-            <div className="grid md:grid-cols-3 gap-6 pt-12">
-              <div className="card">
-                <div className="text-3xl mb-3">🎯</div>
-                <h3 className="font-semibold mb-2">Blind Selection</h3>
-                <p className="text-sm text-gray-400">
-                  See hooks only. Full content revealed after selection.
-                </p>
-              </div>
-              
-              <div className="card">
-                <div className="text-3xl mb-3">📈</div>
-                <h3 className="font-semibold mb-2">Trend-Jacking</h3>
-                <p className="text-sm text-gray-400">
-                  Powered by real Base channel engagement data.
-                </p>
-              </div>
-              
-              <div className="card">
-                <div className="text-3xl mb-3">⛓️</div>
-                <h3 className="font-semibold mb-2">Onchain Premium</h3>
-                <p className="text-sm text-gray-400">
-                  Subscribe onchain for unlimited hook generation.
-                </p>
-              </div>
+          {/* Bawah */}
+          <div className="relative z-20 w-full px-4 pb-12 mt-auto">
+            {/* Kartu Input Putih */}
+            <BottomInputCard />
+            
+            <div className="w-full flex justify-center mt-8">
+              <div className="w-[130px] h-[5px] bg-white/20 rounded-full" />
             </div>
           </div>
-        )}
-
-        {/* Topic Selection */}
-        {appState === 'topic' && (
-          <TopicSelector
-            walletAddress={address!}
-            onTopicSelected={handleTopicSelected}
-          />
-        )}
-
-        {/* Hook Selection */}
-        {appState === 'hooks' && (
-          <HookSelector
-            walletAddress={address!}
-            topic={topic}
-            hooks={hooks}
-            isPremium={isPremium}
-            currentQuota={quota ?? 0}
-            onHookSelected={handleHookSelected}
-            onBack={() => setAppState('topic')}
-          />
-        )}
-
-        {/* Content Reveal */}
-        {appState === 'content' && (
-          <ContentReveal
-            hook={selectedHook}
-            fullContent={fullContent}
-            onReset={handleReset}
-          />
-        )}
-      </div>
-
-      {/* Footer */}
-      <footer className="border-t border-[#2a2a2a] mt-20 py-8">
-        <div className="max-w-6xl mx-auto px-4 text-center text-gray-400 text-sm">
-          <p>Built for Base Hackathon • Powered by Eigen AI & Gemini</p>
-          <p className="mt-2">
-            <a href="https://docs.base.org" className="hover:text-white transition">
-              Base Docs
-            </a>
-            {' • '}
-            <a href="https://docs.farcaster.xyz" className="hover:text-white transition">
-              Farcaster Docs
-            </a>
-          </p>
         </div>
-      </footer>
+      </div>
     </main>
   );
 }
