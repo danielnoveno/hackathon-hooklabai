@@ -12,15 +12,15 @@ export default function WalletConnect({ isConnected, showModal = false }: Wallet
   const [showWalletModal, setShowWalletModal] = useState(showModal);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const { connect, connectors, isPending } = useConnect();
   const { isConnected: accountConnected, address } = useAccount();
   const { disconnect } = useDisconnect();
 
   // Check if Metamask is installed (computed on render)
-  const hasMetamask = typeof window !== 'undefined' && 
-                     typeof window.ethereum !== 'undefined' && 
-                     window.ethereum?.isMetaMask === true;
+  const hasMetamask = typeof window !== 'undefined' &&
+    typeof window.ethereum !== 'undefined' &&
+    window.ethereum?.isMetaMask === true;
 
   // Debug: Log available connectors
   useEffect(() => {
@@ -30,19 +30,21 @@ export default function WalletConnect({ isConnected, showModal = false }: Wallet
       ethereum: typeof window !== 'undefined' ? window.ethereum : undefined
     });
 
-    console.log('Available connectors:', connectors.map(c => ({ 
-      id: c.id, 
-      name: c.name, 
+    console.log('Available connectors:', connectors.map(c => ({
+      id: c.id,
+      name: c.name,
       type: c.type,
       ready: c.ready
     })));
+
+    
   }, [connectors]);
 
   const handleConnectMetamask = async () => {
     try {
       setIsConnecting(true);
       setError(null);
-      
+
       // Check if Metamask is installed
       if (typeof window.ethereum === 'undefined' || !window.ethereum.isMetaMask) {
         setError('MetaMask is not installed! Please install MetaMask extension.');
@@ -56,7 +58,7 @@ export default function WalletConnect({ isConnected, showModal = false }: Wallet
 
       // Find injected connector (Metamask)
       const metamaskConnector = connectors.find(c => c.type === 'injected' || c.id.includes('injected'));
-      
+
       console.log('Attempting Metamask connection with connector:', metamaskConnector);
 
       if (!metamaskConnector) {
@@ -83,11 +85,11 @@ export default function WalletConnect({ isConnected, showModal = false }: Wallet
       setError(null);
 
       // Find Coinbase connector
-      const coinbaseConnector = connectors.find(c => 
-        c.type === 'coinbaseWallet' || 
+      const coinbaseConnector = connectors.find(c =>
+        c.type === 'coinbaseWallet' ||
         c.id.includes('coinbase')
       );
-      
+
       console.log('Attempting Coinbase connection with connector:', coinbaseConnector);
 
       if (!coinbaseConnector) {
@@ -115,41 +117,62 @@ export default function WalletConnect({ isConnected, showModal = false }: Wallet
   // Jika sudah connected
   if (accountConnected) {
     return (
-      <div className="relative">
+      <>
+        {/* ADDRESS BUTTON (TRIGGER SAJA) */}
         <button
           onClick={() => setShowWalletModal(true)}
           className="group flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 border border-gray-200 rounded-full transition-all"
         >
-          <div className="w-2 h-2 rounded-full shrink-0 bg-green-500" />
-          <span className="text-gray-700 text-sm font-bold group-hover:text-black">
+          <div className="w-2 h-2 rounded-full bg-green-500" />
+          <span className="text-gray-700 text-sm font-bold">
             {address?.slice(0, 6)}...{address?.slice(-4)}
           </span>
         </button>
 
-        {/* Dropdown saat connected */}
+        {/* DISCONNECT POPUP - FIXED MODAL */}
         {showWalletModal && (
-          <div className="absolute top-full mt-2 right-0 z-50 bg-white rounded-xl shadow-lg p-3 min-w-[200px]">
-            <div className="text-xs text-gray-500 mb-2">Connected</div>
-            <div className="text-sm font-bold text-gray-900 mb-3">
-              {address?.slice(0, 10)}...{address?.slice(-8)}
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl p-6 w-[320px] shadow-2xl">
+
+              {/* HEADER */}
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-gray-900">
+                  Wallet Connected
+                </h3>
+                <button
+                  onClick={() => setShowWalletModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* ADDRESS */}
+              <div className="mb-4 p-3 bg-gray-100 rounded-lg">
+                <p className="text-xs text-gray-500 mb-1">Wallet Address</p>
+                <p className="text-sm font-mono break-all text-gray-900">
+                  {address}
+                </p>
+              </div>
+
+              {/* DISCONNECT BUTTON */}
+              <button
+                onClick={() => {
+                  disconnect();
+                  setShowWalletModal(false);
+                }}
+                className="w-full py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition"
+              >
+                Disconnect Wallet
+              </button>
             </div>
-            <button
-              onClick={handleDisconnect}
-              className="w-full px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-bold transition-colors"
-            >
-              Disconnect
-            </button>
-            <button
-              onClick={() => setShowWalletModal(false)}
-              className="w-full mt-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-lg text-sm font-bold transition-colors"
-            >
-              Close
-            </button>
           </div>
         )}
-      </div>
+      </>
     );
   }
+
+  
 
   // Jika belum connected
   return (
@@ -206,18 +229,17 @@ export default function WalletConnect({ isConnected, showModal = false }: Wallet
               <button
                 onClick={handleConnectMetamask}
                 disabled={isConnecting}
-                className={`w-full flex items-center gap-4 p-4 rounded-xl transition-all border disabled:opacity-50 ${
-                  hasMetamask 
-                    ? 'bg-orange-50 hover:bg-orange-100 border-orange-200' 
-                    : 'bg-gray-100 border-gray-300 cursor-not-allowed'
-                }`}
+                className={`w-full flex items-center gap-4 p-4 rounded-xl transition-all border disabled:opacity-50 ${hasMetamask
+                  ? 'bg-orange-50 hover:bg-orange-100 border-orange-200'
+                  : 'bg-gray-100 border-gray-300 cursor-not-allowed'
+                  }`}
               >
                 <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center shrink-0">
                   <svg className="w-6 h-6 text-white" viewBox="0 0 40 40" fill="currentColor">
-                    <path d="M32.5 5L20 14.5 22.5 9.5 32.5 5z"/>
-                    <path d="M7.5 5L20 14.5 17.5 9.5 7.5 5z"/>
-                    <path d="M27.5 29L25 33.5 32 35.5 34 29 27.5 29z"/>
-                    <path d="M6 29L8 35.5 15 33.5 12.5 29 6 29z"/>
+                    <path d="M32.5 5L20 14.5 22.5 9.5 32.5 5z" />
+                    <path d="M7.5 5L20 14.5 17.5 9.5 7.5 5z" />
+                    <path d="M27.5 29L25 33.5 32 35.5 34 29 27.5 29z" />
+                    <path d="M6 29L8 35.5 15 33.5 12.5 29 6 29z" />
                   </svg>
                 </div>
                 <div className="flex-1 text-left">
@@ -239,9 +261,9 @@ export default function WalletConnect({ isConnected, showModal = false }: Wallet
               >
                 <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
                   <svg className="w-6 h-6 text-white" viewBox="0 0 28 28" fill="currentColor">
-                    <circle cx="14" cy="14" r="14"/>
-                    <path d="M14 4C8.5 4 4 8.5 4 14s4.5 10 10 10 10-4.5 10-10S19.5 4 14 4zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z" fill="white"/>
-                    <path d="M11 13h6v2h-6z" fill="white"/>
+                    <circle cx="14" cy="14" r="14" />
+                    <path d="M14 4C8.5 4 4 8.5 4 14s4.5 10 10 10 10-4.5 10-10S19.5 4 14 4zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z" fill="white" />
+                    <path d="M11 13h6v2h-6z" fill="white" />
                   </svg>
                 </div>
                 <div className="flex-1 text-left">

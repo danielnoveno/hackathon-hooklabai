@@ -1,7 +1,7 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { base } from 'wagmi/chains';
+import { baseSepolia } from 'wagmi/chains';
 import { http, createConfig, WagmiProvider } from 'wagmi';
 import { coinbaseWallet, injected } from 'wagmi/connectors';
 import { useState, type ReactNode } from 'react';
@@ -9,7 +9,7 @@ import { useState, type ReactNode } from 'react';
 export function Providers({ children }: { children: ReactNode }) {
   const [config] = useState(() =>
     createConfig({
-      chains: [base],
+      chains: [baseSepolia],
       connectors: [
         injected(), // Metamask - harus di atas
         coinbaseWallet({
@@ -19,7 +19,7 @@ export function Providers({ children }: { children: ReactNode }) {
       ],
       ssr: false,
       transports: {
-        [base.id]: http(),
+        [baseSepolia.id]: http(),
       },
     })
   );

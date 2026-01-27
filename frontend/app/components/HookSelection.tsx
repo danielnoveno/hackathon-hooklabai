@@ -16,6 +16,23 @@ type HooksSelectionProps = {
   userName: string;
 };
 
+function getInitial(name: string) {
+  if (!name) return 'A';
+  return name.trim().charAt(0).toUpperCase();
+}
+
+function getAvatarColor(name: string) {
+  const colors = [
+    'from-blue-500 to-indigo-600',
+    'from-emerald-500 to-teal-600',
+    'from-pink-500 to-rose-600',
+    'from-purple-500 to-violet-600',
+    'from-orange-500 to-amber-600',
+  ];
+  const index = name ? name.length % colors.length : 0;
+  return colors[index];
+}
+
 export default function HooksSelection({ onSelectHook, onBack, userName }: HooksSelectionProps) {
   // Mock data - nanti bisa diganti dengan data dari API
   const hooks: Hook[] = [
@@ -94,7 +111,15 @@ export default function HooksSelection({ onSelectHook, onBack, userName }: Hooks
             {/* Header Card */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-600 to-gray-700" />
+                <div
+                  className={`w-8 h-8 rounded-full bg-gradient-to-br ${getAvatarColor(
+                    hook.username
+                  )} flex items-center justify-center text-white text-sm font-bold`}
+                >
+                  {getInitial(hook.username)}
+                </div>
+
+
                 <span className="text-white font-medium">{hook.username}</span>
               </div>
               <span className="px-3 py-1 bg-blue-600 text-white text-xs rounded-full font-medium">

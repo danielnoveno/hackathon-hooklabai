@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAccount, useSendTransaction, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
+import { useSignMessage } from 'wagmi';
 
 type TransactionModalProps = {
   isOpen: boolean;
@@ -11,20 +12,23 @@ type TransactionModalProps = {
   hasCredits: boolean;
 };
 
-export default function TransactionModal({ 
-  isOpen, 
-  onClose, 
+export default function TransactionModal({
+  isOpen,
+  onClose,
   onSuccess,
-  hasCredits 
+  hasCredits
 }: TransactionModalProps) {
   const { address } = useAccount();
   const [isProcessing, setIsProcessing] = useState(false);
-  
+
   const { data: hash, sendTransaction, isPending } = useSendTransaction();
-  
+
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
+
+  const { signMessageAsync } = useSignMessage();
+
 
   // Ketika transaksi berhasil
   if (isSuccess && !isProcessing) {
@@ -36,31 +40,18 @@ export default function TransactionModal({
   const handleTransaction = async () => {
     try {
       setIsProcessing(true);
-      
-      if (hasCredits) {
-        // Minta signature untuk konfirmasi (tetap butuh wallet signature)
-        const RECIPIENT_ADDRESS = '0x0000000000000000000000000000000000000000'; // Ganti dengan alamat Anda
-        
-        // Kirim transaksi dengan value 0 (gratis tapi tetap butuh signature)
-        sendTransaction({
-          to: RECIPIENT_ADDRESS as `0x${string}`,
-          value: parseEther('0'), // 0 ETH karena pakai credits
-        });
-      } else {
-        // Kirim transaksi pembayaran (0.001 ETH)
-        const RECIPIENT_ADDRESS = '0x0000000000000000000000000000000000000000'; // Ganti dengan alamat Anda
-        
-        sendTransaction({
-          to: RECIPIENT_ADDRESS as `0x${string}`,
-          value: parseEther('0.001'), // 0.001 ETH
-        });
-      }
-      
-    } catch (error) {
-      console.error('Transaction error:', error);
+
+      await signMessageAsync({
+        message: `Confirm hook generation on HookLab AI\nUser: ${address}`,
+      });
+
+      onSuccess();
+    } catch (err) {
+      console.error('Signature rejected', err);
       setIsProcessing(false);
     }
   };
+
 
   if (!isOpen) return null;
 

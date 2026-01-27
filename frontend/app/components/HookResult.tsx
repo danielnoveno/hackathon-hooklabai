@@ -48,14 +48,29 @@ ${hook.content}${hook.content}${hook.content}${hook.content}${hook.content}${hoo
     }
   };
 
+  function getInitial(name: string) {
+    if (!name) return 'A';
+    return name.trim().charAt(0).toUpperCase();
+  }
+
+  function getAvatarColor(name: string) {
+    const colors = [
+      'from-blue-500 to-indigo-600',
+      'from-emerald-500 to-teal-600',
+      'from-pink-500 to-rose-600',
+      'from-purple-500 to-violet-600',
+      'from-orange-500 to-amber-600',
+    ];
+    const index = name ? name.length % colors.length : 0;
+    return colors[index];
+  }
+
   return (
     <div className="flex-1 flex flex-col bg-black overflow-y-auto">
       {/* Header */}
       <div className="pt-12 px-6 pb-6 flex items-center gap-3">
         <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 9a1 1 0 112 0v4a1 1 0 11-2 0V9zm1-4a1 1 0 100 2 1 1 0 000-2z"/>
-          </svg>
+          <img src="/logo_hooklab.jpg" alt="Logo HookLab AI" />
         </div>
         <span className="text-white font-bold text-xl font-poppins tracking-wide">
           HookLab AI
@@ -68,7 +83,14 @@ ${hook.content}${hook.content}${hook.content}${hook.content}${hook.content}${hoo
           {/* Header Card */}
           <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/10">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-600 to-gray-700" />
+              <div
+                className={`w-8 h-8 rounded-full bg-gradient-to-br ${getAvatarColor(
+                  hook.username
+                )} flex items-center justify-center text-white text-sm font-bold`}
+              >
+                {getInitial(hook.username)}
+              </div>
+
               <span className="text-white font-medium">{hook.username}</span>
             </div>
             <span className="px-3 py-1 bg-blue-600 text-white text-xs rounded-full font-medium">
