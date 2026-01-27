@@ -150,10 +150,6 @@ ${hook.content}${hook.content}${hook.content}${hook.content}${hook.content}${hoo
           Try Another Hooks
         </button>
 
-        {/* Bottom Indicator */}
-        <div className="w-full flex justify-center mt-8">
-          <div className="w-[130px] h-[5px] bg-white/20 rounded-full" />
-        </div>
       </div>
     </div>
   );

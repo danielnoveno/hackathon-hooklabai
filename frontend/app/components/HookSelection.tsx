@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { DUMMY_HOOKS } from '../data/dummyHooks';
+import type { TopicKey } from '../config/topicPrompts';
 
 type Hook = {
   id: string;
@@ -35,43 +37,7 @@ function getAvatarColor(name: string) {
 
 export default function HooksSelection({ onSelectHook, onBack, userName }: HooksSelectionProps) {
   // Mock data - nanti bisa diganti dengan data dari API
-  const hooks: Hook[] = [
-    {
-      id: '1',
-      username: userName || 'Anonymous',
-      topic: 'topic',
-      content: "You don't need more courage to post on Linkedin. You need less friction",
-      preview: "You don't need more courage to post on Linkedin. You need less friction more"
-    },
-    {
-      id: '2',
-      username: userName || 'Anonymous',
-      topic: 'topic',
-      content: "You don't need more courage to post on Linkedin. You need less friction",
-      preview: "You don't need more courage to post on Linkedin. You need less friction more"
-    },
-    {
-      id: '3',
-      username: userName || 'Anonymous',
-      topic: 'topic',
-      content: "You don't need more courage to post on Linkedin. You need less friction",
-      preview: "You don't need more courage to post on Linkedin. You need less friction more"
-    },
-    {
-      id: '4',
-      username: userName || 'Anonymous',
-      topic: 'topic',
-      content: "You don't need more courage to post on Linkedin. You need less friction",
-      preview: "You don't need more courage to post on Linkedin. You need less friction more"
-    },
-    {
-      id: '5',
-      username: userName || 'Anonymous',
-      topic: 'topic',
-      content: "You don't need more courage to post on Linkedin. You need less friction",
-      preview: "You don't need more courage to post on Linkedin. You need less friction more"
-    }
-  ];
+  const hooks = DUMMY_HOOKS[userName as TopicKey] ?? [];
 
   return (
     <div className="flex-1 flex flex-col bg-black overflow-y-auto">

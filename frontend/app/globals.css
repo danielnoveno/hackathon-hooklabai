@@ -16,3 +16,195 @@ body {
     text-wrap: balance;
   }
 }
+
+@keyframes fadeFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1);
+  }
+}
+
+.animate-fade-float {
+  animation: fadeFloat 6s ease-in-out infinite;
+}
+
+@keyframes slowPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+}
+
+.animate-slow-pulse {
+  animation: slowPulse 8s ease-in-out infinite;
+}
+
+/* DOT MAP BACKGROUND */
+.bg-dot-map {
+  background-image: radial-gradient(
+    rgba(255, 255, 255, 0.5) 1px,
+    transparent 1px
+  );
+  background-size: 6px 6px;
+}
+
+/* MAP MOVE */
+@keyframes mapMove {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-360px);
+  }
+}
+
+.animate-map-move {
+  animation: mapMove 18s linear infinite;
+}
+
+/* DENSE DOT MAP */
+.bg-dot-map-dense {
+  background-image: radial-gradient(
+    rgba(168, 85, 247, 0.9) 1px,
+    transparent 1px
+  );
+  background-size: 4px 4px;
+}
+
+/* SLOW MAP MOVE */
+@keyframes mapMoveSlow {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-240px);
+  }
+}
+
+.animate-map-move-slow {
+  animation: mapMoveSlow 22s linear infinite;
+}
+
+/* FAST MAP MOVE (PARALLAX) */
+@keyframes mapMoveFast {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-420px);
+  }
+}
+
+.animate-map-move-fast {
+  animation: mapMoveFast 40s linear infinite;
+}
+
+/* MOBILE DOT MAP */
+.bg-dot-map-mobile {
+  background-image: radial-gradient(
+    rgba(168, 85, 247, 0.85) 1px,
+    transparent 1px
+  );
+  background-size: 3px 3px;
+}
+
+/* MOBILE MAP MOVE */
+@keyframes mapMoveMobile {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-35%);
+  }
+}
+
+.animate-map-move-mobile {
+  animation: mapMoveMobile 28s linear infinite;
+}
+
+/* PARALLAX SLOW */
+@keyframes mapMoveMobileSlow {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-15%);
+  }
+}
+
+.animate-map-move-mobile-slow {
+  animation: mapMoveMobileSlow 50s linear infinite;
+}
+
+/* globals.css - Tambahkan ke file CSS global Anda */
+
+/* Fade In Animation untuk Threads */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out forwards;
+}
+
+/* Custom Scrollbar untuk Threads Feed */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.5);
+  border-radius: 10px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.7);
+}
+
+/* Smooth Transitions */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Loading State */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
