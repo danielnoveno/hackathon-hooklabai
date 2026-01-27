@@ -16,8 +16,12 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "HookLab AI",
-  description: "Generate viral hooks on Base",
+  title: "HookLab AI - Generate Viral Hooks",
+  description: "Generate viral hooks on Base blockchain with AI",
+  icons: {
+    icon: '/logo_hooklab.jpg',
+    apple: '/logo_hooklab.jpg',
+  },
 };
 
 export default function RootLayout({
@@ -27,6 +31,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/logo_hooklab.jpg" type="image/jpeg" />
+      </head>
       <body className={`${roboto.variable} ${poppins.variable} font-roboto bg-black antialiased`}>
         <Providers>{children}</Providers>
       </body>
