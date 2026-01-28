@@ -306,13 +306,9 @@ export default function DomeGlobe({ onZoomLevelChange }: DomeGlobeProps) {
       e.preventDefault();
       e.stopPropagation();
       
-      console.log('🖱️ WHEEL:', e.deltaY);
-      
-      const delta = e.deltaY * 0.003; // Even more sensitive
+      const delta = e.deltaY * 0.003;
       const newZoom = Math.max(0.5, Math.min(5, targetZoomRef.current + delta));
       targetZoomRef.current = newZoom;
-      
-      console.log('📏 ZOOM:', newZoom.toFixed(2));
       
       // Update level
       let newLevel: ZoomLevel;
@@ -328,7 +324,6 @@ export default function DomeGlobe({ onZoomLevelChange }: DomeGlobeProps) {
       }
       
       if (newLevel !== zoomLevel) {
-        console.log('🔄 LEVEL:', newLevel);
         setZoomLevel(newLevel);
         onZoomLevelChange?.(newLevel);
       }
@@ -339,7 +334,6 @@ export default function DomeGlobe({ onZoomLevelChange }: DomeGlobeProps) {
       isDraggingRef.current = true;
       previousMouseRef.current = { x: e.clientX, y: e.clientY };
       rotationVelocityRef.current = { x: 0, y: 0 };
-      console.log('👆 DRAG START');
     };
 
     const handlePointerMove = (e: PointerEvent) => {
@@ -359,7 +353,6 @@ export default function DomeGlobe({ onZoomLevelChange }: DomeGlobeProps) {
 
     const handlePointerUp = () => {
       isDraggingRef.current = false;
-      console.log('👆 DRAG END');
     };
 
     const handleResize = () => {
@@ -370,7 +363,6 @@ export default function DomeGlobe({ onZoomLevelChange }: DomeGlobeProps) {
     };
 
     // ADD LISTENERS TO MOUNT
-    console.log('🎯 Adding event listeners to mount');
     currentMount.addEventListener('wheel', handleWheel, { passive: false });
     currentMount.addEventListener('pointerdown', handlePointerDown);
     window.addEventListener('pointermove', handlePointerMove);
@@ -381,7 +373,6 @@ export default function DomeGlobe({ onZoomLevelChange }: DomeGlobeProps) {
 
     // Cleanup
     return () => {
-      console.log('🧹 Cleanup');
       if (animationIdRef.current) {
         cancelAnimationFrame(animationIdRef.current);
       }
@@ -406,7 +397,7 @@ export default function DomeGlobe({ onZoomLevelChange }: DomeGlobeProps) {
 
   return (
     <div className="absolute inset-0">
-      {/* THREE.js Mount - NO POINTER EVENTS BLOCKING */}
+      {/* THREE.js Mount */}
       <div 
         ref={mountRef} 
         className="absolute inset-0 w-full h-full"
@@ -417,10 +408,12 @@ export default function DomeGlobe({ onZoomLevelChange }: DomeGlobeProps) {
         }}
       />
       
-      {/* Threads Overlay */}
+      {/* Threads Overlay - SCROLLBAR HIDDEN */}
       {showThreads && (
-        <div className="absolute inset-0 flex items-start justify-center pt-32 pb-20 pointer-events-none">
-          <div className="w-full max-w-[380px] px-4 space-y-3 overflow-y-auto max-h-[60vh] pointer-events-auto">
+        <div className="absolute inset-0 flex items-start justify-center pt-24 pb-20 pointer-events-none">
+          <div 
+            className="w-full max-w-[380px] px-4 space-y-3 max-h-[65vh] pointer-events-auto overflow-y-auto custom-scrollbar"
+          >
             {THREADS_DATA.map((thread, index) => (
               <div
                 key={thread.id}
@@ -494,6 +487,34 @@ export default function DomeGlobe({ onZoomLevelChange }: DomeGlobeProps) {
           </p>
         </div>
       </div>
+
+      <style jsx>{`
+        /* Custom Scrollbar - HIDDEN */
+        .custom-scrollbar {
+          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none; /* IE and Edge */
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+          display: none; /* Chrome, Safari, Opera */
+        }
+
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-fade-in {
+          animation: fade-in 0.4s ease-out forwards;
+          opacity: 0;
+        }
+      `}</style>
     </div>
   );
 }

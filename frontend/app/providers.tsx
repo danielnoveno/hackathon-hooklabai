@@ -1,31 +1,33 @@
 'use client';
 
+import { WagmiProvider, createConfig, http } from 'wagmi';
+import { base } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { baseSepolia } from 'wagmi/chains';
-import { http, createConfig, WagmiProvider } from 'wagmi';
-import { coinbaseWallet, injected } from 'wagmi/connectors';
-import { useState, type ReactNode } from 'react';
+import { injected, coinbaseWallet } from 'wagmi/connectors';
+import { ReactNode } from 'react';
 
-export function Providers({ children }: { children: ReactNode }) {
-  const [config] = useState(() =>
-    createConfig({
-      chains: [baseSepolia],
-      connectors: [
-        injected(), // Metamask - harus di atas
-        coinbaseWallet({
-          appName: 'HookLab AI',
-          appLogoUrl: undefined,
-        }),
-      ],
-      ssr: false,
-      transports: {
-        [baseSepolia.id]: http(),
-      },
-    })
-  );
+// Create wagmi config
+const config = createConfig({
+  chains: [base],
+  connectors: [
+    injected(),
+    coinbaseWallet({
+      appName: 'HookLab AI',
+    }),
+  ],
+  transports: {
+    [base.id]: http(),
+  },
+});
 
-  const [queryClient] = useState(() => new QueryClient());
+// Create query client
+const queryClient = new QueryClient();
 
+type ProvidersProps = {
+  children: ReactNode;
+};
+
+export function Providers({ children }: ProvidersProps) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>

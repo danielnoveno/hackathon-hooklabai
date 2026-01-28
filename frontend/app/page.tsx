@@ -11,6 +11,7 @@ import HookResult from './components/HookResult';
 import SplashScreen from './components/SplashScreen';
 
 import { TOPIC_PROMPTS, type TopicKey } from './config/topicPrompts';
+import { userStorage } from '../utils/userStorage';
 
 type Hook = {
   id: string;
@@ -34,48 +35,52 @@ export default function Home() {
   const [showSplash, setShowSplash] = useState(true);
   const [isThinking, setIsThinking] = useState(false);
 
-  // User name management - Initialize with check
+  // User name management
   const [userName, setUserName] = useState<string>('');
   const [showNameModal, setShowNameModal] = useState(false);
-  const [nameInitialized, setNameInitialized] = useState(false);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-  // Check localStorage untuk nama user - Optimized approach
+  // Load user data dari localStorage ketika connect wallet
   useEffect(() => {
     if (!isConnected || !address) {
-      // Reset state when disconnected
-      if (nameInitialized) {
-        setUserName('');
-        setShowNameModal(false);
-        setNameInitialized(false);
-      }
+      // Reset state ketika disconnect
+      setUserName('');
+      setCredits(5);
+      setIsDataLoaded(false);
+      setShowNameModal(false);
       return;
     }
 
-    // Only check once per connection
-    if (nameInitialized) return;
+    // Load user data
+    const userData = userStorage.getUserData(address);
 
-    // Use queueMicrotask to defer state updates
-    queueMicrotask(() => {
-      const storedName = localStorage.getItem(`userName_${address}`);
-
-      if (storedName) {
-        setUserName(storedName);
-      } else {
-        // First time user - ask for name
-        setShowNameModal(true);
-      }
-
-      setNameInitialized(true);
-    });
-  }, [isConnected, address, nameInitialized]);
-
-
-  // Handler untuk submit nama user
-  const handleNameSubmit = useCallback((name: string) => {
-    setUserName(name);
-    if (address) {
-      localStorage.setItem(`userName_${address}`, name);
+    if (userData && userData.name) {
+      // User sudah terdaftar - load data mereka
+      setUserName(userData.name);
+      setCredits(userData.credits);
+      setShowNameModal(false);
+    } else {
+      // User baru - minta nama
+      setUserName('');
+      setCredits(5);
+      setShowNameModal(true);
     }
+
+    setIsDataLoaded(true);
+  }, [isConnected, address]);
+
+  // Handler untuk submit nama user (first time)
+  const handleNameSubmit = useCallback((name: string) => {
+    if (!address) return;
+
+    setUserName(name);
+    
+    // Save ke localStorage
+    userStorage.saveUserData(address, {
+      name,
+      credits: 5, // Initial credits untuk user baru
+    });
+    
     setShowNameModal(false);
   }, [address]);
 
@@ -88,13 +93,11 @@ export default function Home() {
     setTimeout(() => {
       setIsThinking(false);
       setAppState('selecting');
-    }, 1800); // simulasi AI thinking
+    }, 1800);
   };
-
 
   // Handler ketika user pilih hook
   const handleSelectHook = useCallback((hook: Hook) => {
-    // Update hook dengan username dari user
     const updatedHook = {
       ...hook,
       username: userName || 'Anonymous'
@@ -105,11 +108,17 @@ export default function Home() {
 
   // Handler setelah transaksi sukses
   const handleTransactionSuccess = useCallback(() => {
+    if (!address) return;
+
     setShowTransactionModal(false);
 
-    // Kurangi credits jika masih ada
-    if (credits > 0) {
-      setCredits(prev => Math.max(0, prev - 1));
+    // Kurangi credits dan simpan ke localStorage
+    const hasCredits = credits > 0;
+    
+    if (hasCredits) {
+      const newCredits = Math.max(0, credits - 1);
+      setCredits(newCredits);
+      userStorage.updateCredits(address, newCredits);
     }
 
     // Set hook yang dipilih dan pindah ke halaman result
@@ -118,13 +127,14 @@ export default function Home() {
       setAppState('result');
       setPendingHook(null);
     }
-  }, [credits, pendingHook]);
+  }, [credits, pendingHook, address]);
 
   // Handler untuk try another hooks
   const handleTryAnother = useCallback(() => {
     setAppState('initial');
     setSelectedHook(null);
     setPrompt('');
+    setActiveTopic(null);
   }, []);
 
   // Handler untuk kembali ke initial
@@ -143,28 +153,34 @@ export default function Home() {
     'Health'
   ];
 
+  // Splash Screen
+  if (showSplash) {
+    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  }
+
+  // Loading state saat data belum loaded
+  if (isConnected && !isDataLoaded) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-black">
+        <div className="text-white">Loading...</div>
+      </main>
+    );
+  }
+
   return (
     <>
-      {showSplash && (
-        <SplashScreen onFinish={() => setShowSplash(false)} />
-      )}
-
-
-      <main className="flex min-h-screen flex-col items-center justify-center bg-black">
-
-        <div className="relative w-full max-w-[400px] min-h-screen md:h-[844px] bg-[#0A0A0A] overflow-hidden shadow-2xl flex flex-col">
+      <main className="min-h-screen flex flex-col bg-black">
+        <div className="relative w-full min-h-screen bg-[#0A0A0A] overflow-hidden flex flex-col">
 
           <UIBackground />
 
-          <div className="relative z-10 flex-1 flex flex-col h-full">
+          <div className="relative z-10 flex-1 flex flex-col">
 
-            
             {!isConnected ? (
               // ========================================
               // HALAMAN 1: SEBELUM CONNECT WALLET
               // ========================================
               <>
-                {/* Tengah - Pesan Connect Wallet */}
                 <div className="flex-1 flex flex-col items-center justify-center px-6">
                   <p className="text-white/60 text-sm mb-3 font-medium tracking-wide">
                     HookLab assistant
@@ -175,20 +191,18 @@ export default function Home() {
                   </h1>
                 </div>
 
-                {/* Bawah - Card dengan Tombol Connect */}
                 <div className="relative z-20 w-full px-4 pb-12 mt-auto">
                   <div className="w-full bg-white rounded-[20px] p-5 shadow-lg min-h-[140px] flex flex-col justify-between">
-
                     <div className="flex items-center">
                       <WalletConnect isConnected={false} />
                     </div>
                   </div>
-
-
                 </div>
               </>
             ) : appState === 'selecting' ? (
-              
+              // ========================================
+              // HALAMAN 3: HOOK SELECTION
+              // ========================================
               <HooksSelection
                 onSelectHook={handleSelectHook}
                 onBack={handleBack}
@@ -210,7 +224,7 @@ export default function Home() {
                 {/* Header dengan Logo */}
                 <div className="pt-12 px-6 flex items-center gap-3">
                   <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                    <img src="/logo_hooklab.jpg" alt="Logo HookLab AI" />
+                    <img src="/logo_hooklab.jpg" alt="Logo HookLab AI" className="w-full h-full rounded-full object-cover" />
                   </div>
                   <span className="text-white font-bold text-xl font-poppins tracking-wide">
                     HookLab AI
@@ -241,17 +255,15 @@ export default function Home() {
                             setPrompt(TOPIC_PROMPTS[topic]);
                           }}
                           className={`px-5 py-2 rounded-full text-sm font-medium transition
-                              ${isActive
+                            ${isActive
                               ? 'bg-blue-600 text-white'
                               : 'bg-white text-black hover:bg-gray-100'}
-                              `}
+                          `}
                         >
                           {suggestion}
                         </button>
                       );
                     })}
-
-
                   </div>
                 </div>
 
@@ -306,33 +318,29 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-
-
                 </div>
               </>
             )}
           </div>
         </div>
-
-        {/* Name Input Modal */}
-        <NameInputModal
-          isOpen={showNameModal}
-          onSubmit={handleNameSubmit}
-        />
-
-        {/* Transaction Modal */}
-        <TransactionModal
-          isOpen={showTransactionModal}
-          onClose={() => {
-            setShowTransactionModal(false);
-            setPendingHook(null);
-          }}
-          onSuccess={handleTransactionSuccess}
-          hasCredits={credits > 0}
-        />
       </main>
+
+      {/* Name Input Modal - Hanya untuk user baru */}
+      <NameInputModal
+        isOpen={showNameModal}
+        onSubmit={handleNameSubmit}
+      />
+
+      {/* Transaction Modal */}
+      <TransactionModal
+        isOpen={showTransactionModal}
+        onClose={() => {
+          setShowTransactionModal(false);
+          setPendingHook(null);
+        }}
+        onSuccess={handleTransactionSuccess}
+        hasCredits={credits > 0}
+      />
     </>
-
-
   );
 }

@@ -9,12 +9,32 @@ type NameInputModalProps = {
 
 export default function NameInputModal({ isOpen, onSubmit }: NameInputModalProps) {
   const [name, setName] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim()) {
-      onSubmit(name.trim());
+    
+    const trimmedName = name.trim();
+    
+    // Validasi
+    if (!trimmedName) {
+      setError('Please enter your name');
+      return;
     }
+    
+    if (trimmedName.length < 2) {
+      setError('Name must be at least 2 characters');
+      return;
+    }
+    
+    if (trimmedName.length > 30) {
+      setError('Name must be less than 30 characters');
+      return;
+    }
+    
+    onSubmit(trimmedName);
+    setName('');
+    setError('');
   };
 
   if (!isOpen) return null;
@@ -35,11 +55,19 @@ export default function NameInputModal({ isOpen, onSubmit }: NameInputModalProps
           <input
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+              setError(''); // Clear error saat user mengetik
+            }}
             placeholder="Enter your name..."
             autoFocus
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+            maxLength={30}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
           />
+          
+          {error && (
+            <p className="text-xs text-red-500 mb-3">{error}</p>
+          )}
 
           <button
             type="submit"
