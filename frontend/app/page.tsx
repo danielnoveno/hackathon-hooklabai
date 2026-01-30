@@ -314,7 +314,11 @@ export default function Home() {
               <>
                 <div className="pt-12 px-6 flex items-center gap-3">
                   {/* FIX TAILWIND GRADIENT */}
-                  <div className="relative w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center"><div className="text-white font-bold">HL</div></div>
+                  <div className="relative w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                    <div className="relative w-10 h-10 flex items-center justify-center">
+                      <img src="/logo_hooklab.png" alt="Logo HookLab AI" />
+                    </div>
+                  </div>
                   <span className="text-white font-bold text-xl font-poppins tracking-wide">HookLab AI</span>
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center px-6 -mt-10">

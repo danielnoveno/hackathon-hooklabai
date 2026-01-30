@@ -23,7 +23,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
   return (
     <div className="fixed inset-0 bg-gray-900 flex items-center justify-center">
       {/* Mini Apps Container - Mobile Size */}
-      <div 
+      <div
         className={`
           relative w-full max-w-[430px] h-full max-h-[932px]
           bg-black overflow-hidden
@@ -37,23 +37,23 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Base gradient */}
           <div className="absolute inset-0 bg-gradient-to-b from-black via-[#0a0e1a] to-black" />
-          
+
           {/* Aurora effects */}
           <div className="absolute top-0 left-0 w-full h-full">
-            <div 
+            <div
               className="absolute top-1/4 left-1/4 w-[400px] h-[300px] bg-blue-600/20 rounded-full blur-[100px] animate-aurora-1"
             />
-            <div 
+            <div
               className="absolute top-1/3 right-1/4 w-[350px] h-[250px] bg-indigo-600/15 rounded-full blur-[80px] animate-aurora-2"
             />
-            <div 
+            <div
               className="absolute bottom-1/4 left-1/3 w-[300px] h-[200px] bg-purple-600/10 rounded-full blur-[70px] animate-aurora-3"
             />
-            <div 
+            <div
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] bg-cyan-500/10 rounded-full blur-[120px] animate-pulse"
             />
           </div>
-          
+
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-950/5 to-transparent opacity-50" />
         </div>
 
@@ -63,7 +63,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
         </div>
 
         {/* Content Overlay */}
-        <div 
+        <div
           className={`
             absolute inset-0 flex flex-col items-center justify-center px-6
             transition-opacity duration-500
@@ -73,14 +73,14 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
           style={{ zIndex: 100 }}
         >
           <div className="text-center animate-fade-in-up">
-            
+
             {/* Logo */}
             <div className="mb-6 flex justify-center pointer-events-none">
-              <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-2xl shadow-blue-500/50 animate-float">
-                <div className="w-14 h-14 rounded-full bg-black flex items-center justify-center overflow-hidden">
-                  <img 
-                    src="/logo_hooklab.jpg" 
-                    alt="Logo HookLab" 
+              <div className="relative w-20 h-20 rounded-full flex items-center justify-center animate-float">
+                <div className="w-20 h-20 flex items-center justify-center overflow-hidden">
+                  <img
+                    src="/logo_hooklab.png"
+                    alt="Logo HookLab"
                     className='w-full h-full rounded-full object-cover'
                   />
                 </div>
@@ -104,20 +104,20 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
               style={{ zIndex: 101 }}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
-              
+
               <span className="relative flex items-center gap-2">
                 Get Started
-                <svg 
-                  className="w-5 h-5 transition-transform group-hover:translate-x-1" 
-                  fill="none" 
-                  stroke="currentColor" 
+                <svg
+                  className="w-5 h-5 transition-transform group-hover:translate-x-1"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M13 7l5 5m0 0l-5 5m5-5H6" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
                   />
                 </svg>
               </span>

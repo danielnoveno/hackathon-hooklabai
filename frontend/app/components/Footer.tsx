@@ -58,13 +58,13 @@ const Footer: FC = (): ReactElement => {
     ];
 
     return (
-        <footer className="bg-slate-950 text-slate-400 py-8 border-t border-slate-900">
-            <div className="max-w-md mx-auto px-4">
+        <footer className="max-w-[430px] mx-auto bg-slate-950 text-slate-400 py-8 border-t border-slate-900">
+            <div className="max-w-[430px] mx-auto px-4">
                 {/* Brand Section */}
                 <div className="mb-8 text-center">
                     <div className="flex items-center justify-center gap-2 mb-3 text-white">
-                        <div className="w-8 h-8 rounded bg-indigo-600 flex items-center justify-center font-bold text-sm">
-                            V
+                        <div className="relative w-10 h-10 flex items-center justify-center">
+                            <img src="/logo_hooklab.png" alt="Logo HookLab AI" />
                         </div>
                         <span className="font-bold text-xl">HookLab AI</span>
                     </div>
