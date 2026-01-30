@@ -114,11 +114,11 @@ export default function TransactionModal({
         </div>
 
         {/* Transaction Status */}
-        {(isPending || isConfirming) && (
+        {(isPending || isConfirming || isProcessing) && (
           <div className="mb-4 text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
             <p className="text-sm text-gray-600">
-              {isPending && 'Waiting for approval...'}
+              {(isPending || isProcessing) && 'Waiting for approval...'}
               {isConfirming && 'Confirming transaction...'}
             </p>
           </div>
@@ -128,14 +128,14 @@ export default function TransactionModal({
         <div className="space-y-2">
           <button
             onClick={handleTransaction}
-            disabled={isPending || isConfirming}
+            disabled={isPending || isConfirming || isProcessing}
             className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isPending || isConfirming ? 'Processing...' : hasCredits ? 'Confirm' : 'Pay & Continue'}
+            {isPending || isConfirming || isProcessing ? 'Processing...' : hasCredits ? 'Confirm' : 'Pay & Continue'}
           </button>
           <button
             onClick={onClose}
-            disabled={isPending || isConfirming}
+            disabled={isPending || isConfirming || isProcessing}
             className="w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-bold transition-colors disabled:opacity-50"
           >
             Cancel

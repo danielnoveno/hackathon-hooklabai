@@ -95,11 +95,11 @@ WRITING RULES (MAIN):
 
 GENERAL RULES:
 - Provide VALUE in every sentence.
-- Create 3 variation options (different angles).
+- Create 5 variation options (different angles).
 - POV: "Honest Review" or "Inside Knowledge".
 - Replace "Reality" with "Kenyataannya".
 
 IMPORTANT FOR OUTPUT FORMAT:
-- Output MUST be a pure JSON Array of Strings: ["Content Variation 1", "Content Variation 2", "Content Variation 3"].
+- Output MUST be a pure JSON Array of Strings: ["Content Variation 1", "Content Variation 2", "Content Variation 3", "Content Variation 4", "Content Variation 5"].
 - Do not change the JSON structure, just fill the string "hook" (or content) with the full text (including newlines).
 `;

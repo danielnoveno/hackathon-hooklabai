@@ -111,9 +111,8 @@ export async function POST(req: Request) {
       Example: [{"hook": "Content 1...", "explanation": "Why this works"}]
     `;
 
-    const result = await model.generateContent(finalPrompt);
-    const response = await result.response;
-    let text = response.text();
+    const result = await generateContent(finalPrompt);
+    let text = result;
 
     console.log("✅ RAW AI RESPONSE:", text.substring(0, 100) + "...");
 
@@ -131,14 +130,63 @@ export async function POST(req: Request) {
     return NextResponse.json({ hooks });
 
   } catch (error: any) {
-    console.error("❌ GOOGLE AI ERROR:", error.message);
+    console.error("❌ GENERATION ERROR:", error.message);
 
     // Fallback data
     const safeHooks = [
       { hook: "Error generating hooks. Please try again.", explanation: "System Error" },
-      { hook: "Check your API Key or connection.", explanation: "System Error" }
+      { hook: error.message || "Unknown error", explanation: "System Error" }
     ];
 
     return NextResponse.json({ hooks: safeHooks });
   }
+}
+
+async function generateContent(prompt: string): Promise<string> {
+  const eigenKey = process.env.EIGEN_API_KEY;
+  // Prioritize Eigen AI if configured
+  if (eigenKey && process.env.EIGEN_TEXT_MODEL) {
+    console.log("🚀 Using Eigen AI (gpt-oss-120b)");
+    return await generateWithEigen(prompt, eigenKey);
+  }
+
+  console.log("🤖 Using Gemini AI");
+  const geminiKey = process.env.GEMINI_API_KEY;
+  if (!geminiKey) throw new Error("No AI API Keys configured");
+
+  const genAI = new GoogleGenerativeAI(geminiKey);
+  const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  return response.text();
+}
+
+async function generateWithEigen(prompt: string, apiKey: string): Promise<string> {
+  const baseUrl = process.env.EIGEN_BASE_URL || 'https://api-web.eigenai.com/api/v1';
+  const modelName = process.env.EIGEN_TEXT_MODEL || 'gpt-oss-120b';
+
+  const response = await fetch(`${baseUrl}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: modelName,
+      messages: [
+        { role: 'system', content: 'You are a creative social media expert.' },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.7,
+      max_tokens: 2000
+    })
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Eigen AI Failed: ${response.status} ${errText}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
 }

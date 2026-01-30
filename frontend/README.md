@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HookLab AI (Frontend)
 
-## Getting Started
+Platform AI Agent yang menghasilkan "killer hooks" dan visual menarik untuk sosial media (Farcaster/Warpcast), terintegrasi dengan pembayaran Crypto (Base Network).
 
-First, run the development server:
+## 🚀 Quick Start
 
+### 1. Prerequisites
+- Node.js 18+
+- [Foundry](https://getfoundry.sh/) (Jika ingin menjalankan Anvil/Localhost Blockchain)
+
+### 2. Installation
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd frontend
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Environment Setup
+Copy `.env.example` (atau buat baru) ke `.env.local`:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# === BLOCKCHAIN CONFIG ===
+# 84532 = Base Sepolia (Testnet)
+# 31337 = Anvil (Local)
+NEXT_PUBLIC_CHAIN_ID=84532
+NEXT_PUBLIC_CONTRACT_ADDRESS=0x... (Alamat Smart Contract)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# === AI CONFIG (EIGEN AI) ===
+EIGEN_API_KEY=sk-...
+EIGEN_BASE_URL=https://api-web.eigenai.com/api/v1
+EIGEN_TEXT_MODEL=gpt-oss-120b
+EIGEN_IMAGE_MODEL=eigen-image
 
-## Learn More
+# === 3RD PARTY KEYS ===
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+NEYNAR_API_KEY=...
+NEXT_PUBLIC_ONCHAINKIT_API_KEY=...
 
-To learn more about Next.js, take a look at the following resources:
+# === DEVELOPER MODE ===
+# Bypass pembayaran wallet (GRATIS)
+NEXT_PUBLIC_MOCK_PAYMENT=true
+# Gunakan data dummy tanpa panggil API AI
+NEXT_PUBLIC_USE_MOCK_AI=false
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## ⚙️ Network Setup (Switching)
 
-## Deploy on Vercel
+Aplikasi ini mendukung perpindahan dinamis antara **Localhost** dan **Testnet**.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Mode Local (Anvil) - Development Gratis
+Setup ini mem bypass waiting time transaksi blockchain asli.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1.  Jalankan Anvil di terminal terpisah:
+    ```bash
+    anvil
+    ```
+2.  Update `.env.local`:
+    ```bash
+    NEXT_PUBLIC_CHAIN_ID=31337
+    NEXT_PUBLIC_CONTRACT_ADDRESS=0x... (Ambil yg didapat saat deploy contract ke anvil)
+    ```
+
+### Mode Testnet (Base Sepolia) - Demo Public
+Setup ini menggunakan blockchain asli (Testnet).
+
+1.  Update `.env.local`:
+    ```bash
+    NEXT_PUBLIC_CHAIN_ID=84532
+    NEXT_PUBLIC_CONTRACT_ADDRESS=0x... (Alamat Contract Sepolia)
+    ```
+
+**Catatan:** Saat tombol "Pay" diklik, aplikasi akan otomatis meminta Wallet pengguna untuk pindah ke network yang sesuai dengan `NEXT_PUBLIC_CHAIN_ID`.
+
+---
+
+## 🛠️ Developer Features
+
+### Mock Payment (Bypass Wallet)
+Jika Anda malas menandatangani transaksi setiap kali tes generate gambar:
+Set `NEXT_PUBLIC_MOCK_PAYMENT=true`.
+Aplikasi akan melewatkan langkah `sendTransaction` dan langsung memanggil API Image Generation.
+
+### Eigen AI Troubleshooting
+Jika `generate-image` error:
+- Pastikan `EIGEN_IMAGE_MODEL=eigen-image`.
+- Pastikan `EIGEN_BASE_URL` mengarah ke endpoint yang benar.
+- Cek script manual di `verify-eigen-image.js` untuk tes koneksi independen.
+
+## ▶️ Running App
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000)

@@ -78,9 +78,9 @@ export default function Home() {
         const formattedHooks: Hook[] = data.hooks.map((item: any, i: number) => {
           const contentText = typeof item === 'string' ? item : item.hook;
 
-          // Logic Teaser: Ambil 7 kata pertama saja
+          // Logic Teaser: Ambil 10 kata pertama saja
           const words = contentText.split(/\s+/);
-          const previewText = words.length > 7 ? words.slice(0, 7).join(' ') + '...' : contentText;
+          const previewText = words.length > 10 ? words.slice(0, 10).join(' ') + '...' : contentText;
 
           return {
             id: `ai-${Date.now()}-${i}`,
@@ -206,6 +206,11 @@ export default function Home() {
     setPrompt('');
   }, []);
 
+  const handleBackToSelection = useCallback(() => {
+    setAppState('selecting');
+    setSelectedHook(null);
+  }, []);
+
   // ==========================================
   // FETCH CATEGORIES (DYNAMIC)
   // ==========================================
@@ -271,7 +276,7 @@ export default function Home() {
               <HooksSelection onSelectHook={handleSelectHook} onBack={handleBack} userName={userName} generatedHooks={generatedHooks} />
             ) : appState === 'result' && selectedHook ? (
               // UI HASIL FINAL
-              <HookResult hook={selectedHook} onTryAnother={handleTryAnother} />
+              <HookResult hook={selectedHook} onTryAnother={handleTryAnother} onBack={handleBackToSelection} />
             ) : (
               // UI UTAMA (INPUT)
               <>
