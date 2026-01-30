@@ -1,3 +1,10 @@
 {
-    "remote.autoForwardPortsFallback": 0
+    "remote.autoForwardPortsFallback": 0,
+    "solidity.packageDefaultDependenciesContractsDirectory": "src",
+    "solidity.packageDefaultDependenciesDirectory": "lib",
+    "solidity.remappings": [
+        "forge-std/=/home/user/hackathon-hooklabai/lib/forge-std/src/"
+    ],
+    "solidity.enabledAsYouTypeCompilationErrorCheck": true,
+    "solidity.compileUsingRemoteVersion": "v0.8.20"
 }
