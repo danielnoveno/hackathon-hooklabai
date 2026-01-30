@@ -1,69 +1,90 @@
 # HookLab AI
 
-> A Farcaster-native mini app on Base that helps creators generate high-performing hooks using real social trend data, with blind hook selection and onchain subscription payment.
+> **The Social Gateway to Base.** A Farcaster-native mini app designed to onboard the next generation of Indonesian creators to the Base ecosystem through data-driven virality and onchain rewards.
 
 ## 🎯 One-Liner
-
-**HookLab AI**: Generate viral Farcaster hooks powered by real Base channel trends, with blind selection and onchain premium subscriptions.
+**HookLab AI**: Empowering creators to go viral on Base with AI-optimized hooks and a sustainable "Viral-to-Earn" economy.
 
 ---
+
+
+## 🎯 Mission: Onboarding the Next Wave of Creators
+Base is a land of opportunity, but for many creators in emerging markets like Indonesia, the barrier to entry remains high. HookLab AI acts as a **strategic gateway**, turning the complex world of Web3 into a simple, rewarding content game.
+
+### ⚠️ The Problem
+- **The Entry Barrier**: Creators are often intimidated by wallets and gas fees with no immediate incentive to join a new Layer 2.
+- **The "Shadow" Effort**: Hours are wasted on content that fails because the "hook" isn't optimized for real-time social trends.
+- **Value Gap**: Traditional platforms capture all the value, leaving creators without direct onchain rewards for their viral contributions.
+
+### ✅ Our Solution: HookLab AI
+- **Seamless Onboarding**: Creators join the Base ecosystem by connecting a wallet to unlock a powerful suite of AI tools.
+- **Data-Backed Virality**: Leverages Neynar API to analyze /base channel trends, ensuring every hook is engineered for engagement.
+- **Viral-to-Earn Mechanics**: Creates a rewarding ecosystem where high-performing content can earn recognition and rewards directly onchain.
+
+---
+
 
 ## 🏗️ Architecture Overview
 
 ### Three-Layer Separation
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        FRONTEND                              │
-│  Next.js + OnchainKit + Mobile-First UI                     │
-│  • Wallet connection                                         │
-│  • Topic selection                                           │
-│  • Blind hook display                                        │
-│  • Warpcast deep link                                        │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│                    BACKEND (API Routes)                      │
-│  Next.js API Routes - Single Source of Truth                │
-│  • Quota enforcement                                         │
-│  • Premium verification (reads contract)                     │
-│  • Neynar data fetching                                      │
-│  • AI orchestration (Eigen AI + Gemini)                      │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│                   SMART CONTRACT (Base)                      │
-│  Foundry - HookLabSubscription.sol                           │
-│  • subscribeMonthly() - x402 payment                         │
-│  • isPremium(address) - view function                        │
-│  • Subscribed event emission                                 │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph Frontend [🌐 FRONTEND]
+        direction TB
+        A["<b>Mobile-First UI</b><br/>(Next.js + OnchainKit)"] --> B[Smart Wallet Connection]
+        B --> C[Farcaster Topic Selection]
+        C --> D[Blind Hook Selection]
+        D --> E[Warpcast Deep Link]
+    end
+
+    subgraph Backend [⚙️ BACKEND]
+        direction TB
+        F["<b>Backend Services</b><br/>(Next.js API Routes)"] --> G[(Supabase: User Quota)]
+        H[Premium Verification] --> I[Read Smart Contract State]
+        J[Neynar API: Farcaster Trends] --> K[AI Orchestration: Eigen + Gemini]
+    end
+
+    subgraph Blockchain [⛓️ BLOCKCHAIN]
+        direction TB
+        L["<b>Base L2</b><br/>HookLabSubscription.sol"]
+        L --> L1["subscribeMonthly() - x402 Payment"]
+        L --> L2["isPremium() - View Function"]
+        L --> L3["Subscribed Event Emission"]
+    end
+
+    Frontend <==> Backend
+    Backend <==> Blockchain
 ```
 
+
 ---
+
+
 
 ## 🚀 Core Features
 
 ### 1. Blind Hook Selection
-- AI generates multiple hooks
-- User sees **only hooks** (first sentence, ≤120 chars)
-- No body content visible
-- Selecting a hook **consumes quota**
-- Full content revealed **only after selection**
+- AI generates multiple high-potential hooks based on social data.
+- User sees **only hooks** (first sentence, ≤120 chars) to maintain focus.
+- No body content visible until the selection is finalized.
+- Selecting a specific hook **consumes 1 quota credit**.
+- Full content detail is revealed **only after selection** is confirmed.
 
 ### 2. Trend-Jacking
-- Fetches high-engagement Farcaster posts from Base channel
-- Calculates hook strength: `(likes + recasts + replies) / follower_count`
-- AI uses structure and patterns (not copying)
-- Crypto-native, timely output
+- Fetches high-engagement Farcaster posts directly from the Base channel.
+- Calculates hook strength using the formula: `(likes + recasts + replies) / follower_count`.
+- AI leverages successful structures and patterns without copying content.
+- Delivers crypto-native and timely output tailored for the ecosystem.
 
 ### 3. Quota & Subscription
-- **Free users**: Limited credits (default: 5)
-- **Premium users**: Unlimited
-- Premium status determined **onchain**
-- Backend reads contract, enforces quota
+- **Free users**: Receive limited credits for exploration (default: 5).
+- **Premium users**: Enjoy unlimited hook reveals and content generation.
+- Premium status is determined and verified **onchain** via Base.
+- Backend reads the smart contract state to enforce quota rules accurately.
 
 ---
+
 
 ## 📁 Project Structure
 
@@ -100,18 +121,22 @@ hackathon-hooklabai/
 
 ---
 
+
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| **Smart Contract** | Foundry, Solidity ^0.8.13, Base |
-| **Frontend** | Next.js (App Router), Coinbase OnchainKit, Wagmi, Viem |
-| **Backend** | Next.js API Routes |
-| **AI** | Eigen AI (orchestration), Gemini (LLM) |
-| **Data** | Neynar API (Farcaster), Supabase (quota/users) |
-| **Deployment** | Vercel (frontend), Base (contract) |
+| Layer | Technology | Role |
+|-------|------------|------|
+| **Blockchain** | **Base L2** | Scalable, low-fee infrastructure for creator economy |
+| **Smart Contract** | Foundry / Solidity | Secure subscription & status verification |
+| **Frontend** | Next.js (App Router) | Mobile-first, high-performance creator UI |
+| **Onchain Tools** | **Coinbase OnchainKit** | Seamless Smart Wallet & Paymaster integration |
+| **Backend** | Next.js API Routes | The central orchestrator for data & AI |
+| **Social Data** | **Neynar API** | Real-time indexing of Farcaster/Base trends |
+| **AI Engine** | Eigen AI + Gemini | Advanced LLM for viral content generation |
+| **Database** | Supabase | Efficient off-chain quota & user management |
 
 ---
+
 
 ## ⚡ Quick Start (How to Run)
 
@@ -192,79 +217,91 @@ Open **http://localhost:3000** in your browser.
 
 ---
 
+
 ## 🎮 Application Flow
+
+We prioritize a frictionless user journey, moving creators from a cold start to a viral post in less than 60 seconds.
 
 ```mermaid
 graph TD
-    A[User Opens App] --> B[Connect Wallet]
-    B --> C[Choose Topic]
-    C --> D[Backend Fetches Neynar Trends]
-    D --> E[AI Generates Hooks Only]
-    E --> F[User Sees Blind Hooks]
-    F --> G[User Selects Hook]
-    G --> H{Premium User?}
-    H -->|Yes| I[Unlimited Access]
-    H -->|No| J[Check Quota]
-    J --> K{Quota Available?}
-    K -->|Yes| L[Deduct Quota]
-    K -->|No| M[Show Subscribe Prompt]
-    L --> N[AI Generates Full Content]
-    I --> N
-    N --> O[Reveal Full Content]
-    O --> P[Post to Warpcast]
-    P --> Q[Open warpcast://compose]
+    A[User Opens App] --> B[Connect Base Smart Wallet]
+    B --> C{New User?}
+    C -->|Yes| D[Grant 5 Free Credits - Supabase]
+    C -->|No| E[Fetch Current Status & Quota]
+    
+    E --> F[Enter Topic / Fetch Neynar Trends]
+    D --> F
+    F --> G[AI Generates Blind Hooks]
+    G --> H[User Browses & Selects Best Hook]
+    
+    H --> I{Access Check}
+    I -->|Is Premium?| J[Onchain Verification - Base]
+    I -->|Free User?| K[Quota Check - Supabase]
+    
+    J -->|Verified| L[Unlimited Reveal]
+    K -->|Credits > 0| M[Deduct 1 Credit & Reveal]
+    K -->|Credits = 0| N[Show Subscription Prompt]
+    
+    N -->|Pay on Base| J
+    L --> O[AI Generates Full Content Detail]
+    M --> O
+    
+    O --> P[Deep Link to Warpcast]
+    P --> Q[Post Content & Quality for Viral Rewards]
 ```
-
 ---
+
 
 ## 🧪 Testing
 
 ### Smart Contract Tests
 ```bash
-cd contracts
+# Ensure you are in the root directory
 forge test -vvv
 ```
 
 ### Manual Testing Checklist
-- [ ] Wallet connection works
-- [ ] Topic selection displays
-- [ ] Hooks are generated (no bodies visible)
-- [ ] Hook selection deducts quota
-- [ ] Premium users have unlimited quota
-- [ ] Full content is revealed after selection
-- [ ] Warpcast deep link opens correctly
-- [ ] Subscription transaction works
+- [ ] Wallet connection via OnchainKit works seamlessly
+- [ ] Topic selection correctly displays real-time Farcaster trends
+- [ ] AI generates hooks only (no bodies visible) during selection
+- [ ] Selecting a hook correctly deducts 1 quota from Supabase
+- [ ] Premium users have unlimited quota verified onchain
+- [ ] Full content is revealed only after selection is made
+- [ ] Warpcast deep link opens the compose action correctly
+- [ ] Subscription transaction on Base updates user status
 
 ---
+
 
 ## 🎯 Hackathon Success Criteria
 
-This project succeeds if:
+This project is designed to meet the highest standards of the Base ecosystem:
 
-1. ✅ **Demoable in <60 seconds**
-2. ✅ **Architecture is defensible** under Q&A
-3. ✅ **Flow is understandable** to judges
-4. ✅ **Aligns with Base ecosystem goals**:
-   - Onchain value (subscription)
-   - Social engagement (Farcaster)
-   - Creator monetization (premium)
+1. ✅ **Demoable in <60 seconds**: The user journey from wallet connection to generating a viral post is engineered for maximum speed and retention.
+2. ✅ **Defensible Architecture**: Our hybrid Onchain-Offchain model is built to stand up to technical scrutiny during judge Q&A sessions.
+3. ✅ **Understandable Flow**: Both judges and creators can grasp the core value proposition of HookLab AI instantly upon first use.
+4. ✅ **Alignment with Base Ecosystem Goals**:
+   - **Onchain Value**: Real-world subscription revenue processed directly on the Base network.
+   - **Social Engagement**: Deep, native integration with the Farcaster protocol via Neynar indexing.
+   - **Creator Monetization**: Opening new, sustainable income paths for creators on top of the blockchain.
 
 ---
+
 
 ## 🚨 Important Notes
 
 ### What We CAN Claim
-✅ Onchain subscription payment  
-✅ Premium status verified onchain  
-✅ Real Farcaster trend data integration  
-✅ AI-powered hook generation  
-✅ Blind hook selection mechanism  
+- ✅ Onchain subscription payment handling
+- ✅ Premium status verified directly on the Base blockchain
+- ✅ Real-time Farcaster trend data integration via Neynar API
+- ✅ AI-powered viral hook generation using Gemini & Eigen AI
+- ✅ Psychological blind hook selection mechanism
 
-### What We CANNOT Claim
-❌ Quota stored onchain (it's in Supabase)  
-❌ Tracking token purchases (we track subscriptions)  
-❌ Production-ready scaling  
-❌ Advanced AI reasoning (it's prompt-based)  
+### What We CANNOT Claim 
+- ❌ Quota stored onchain (Managed in Supabase for a gas-less experience)
+- ❌ Tracking individual token purchases (Focus is on monthly subscriptions)
+- ❌ Production-ready scaling
+- ❌ Advanced AI reasoning (The logic is strictly prompt-based)
 
 ---
 
