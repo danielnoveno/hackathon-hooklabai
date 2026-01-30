@@ -10,7 +10,9 @@ type CategoryItem = {
 
 export async function GET() {
     try {
-        const analyzedPath = "/home/user/hackathon-hooklabai/data/analyzed_posts.json";
+        // Fix Path: Assume 'data' is sibling to 'frontend'
+        const analyzedPath = path.join(process.cwd(), '..', 'data', 'analyzed_posts.json');
+        console.log("📂 Reading Categories from:", analyzedPath);
 
         // Default categories if file doesn't exist
         const defaultCategories: CategoryItem[] = [
@@ -21,6 +23,7 @@ export async function GET() {
         ];
 
         if (!fs.existsSync(analyzedPath)) {
+            console.warn("⚠️ Categories file not found at:", analyzedPath);
             return NextResponse.json({ categories: defaultCategories });
         }
 
