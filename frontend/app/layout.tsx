@@ -6,6 +6,11 @@ import { Toaster } from 'react-hot-toast'; // Pastikan sudah install: npm instal
 export const metadata: Metadata = {
   title: 'HookLab AI',
   description: 'Generate viral hooks with AI',
+  icons: {
+    icon: '/logo_hooklab.png',
+    shortcut: '/logo_hooklab.png',
+    apple: '/logo_hooklab.png',
+  },
 };
 
 export default function RootLayout({
@@ -19,7 +24,7 @@ export default function RootLayout({
         <Providers>
           {/* Main Container Mini App */}
           <div className="mx-auto max-w-[430px] min-h-screen bg-black relative shadow-2xl overflow-hidden">
-            
+
             {/* SETUP TOAST KHUSUS MINI APP */}
             <Toaster
               position="top-center"

@@ -11,6 +11,7 @@ import ScrollFloat from './reachbits/ScrollFloat';
 import VerticalCarousel from './reachbits/VerticalCarousel'; // Pastikan komponen ini ada
 import TrendingPosts from './TrendingPosts';
 import FAQ from './FAQ';
+import Footer from './Footer';
 
 type LandingPageProps = {
   onFinish: () => void;
@@ -400,14 +401,19 @@ export default function LandingPage({ onFinish }: LandingPageProps) {
         {/* --- FAQ SECTION --- */}
         <FAQ />
 
+        {/* --- FOOTER SECTION --- */}
+        <Footer />
+
       </div>
 
       {/* 3. FIXED NAVBAR AT BOTTOM */}
-      <div className="absolute bottom-10 w-full px-2 z-50 flex justify-center pointer-events-none">
+      <div className="fixed bottom-10 w-full px-2 z-50 flex justify-center pointer-events-none">
         <div className="pointer-events-auto">
           <PillNav items={navItems} />
         </div>
       </div>
+
+
 
       {/* Global Style & Animations */}
       <style jsx global>{`

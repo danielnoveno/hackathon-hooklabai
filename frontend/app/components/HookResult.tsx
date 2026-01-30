@@ -282,8 +282,8 @@ export default function HookResult({ hook, onTryAnother, onBack }: HookResultPro
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-          <img src="/logo_hooklab.jpg" alt="Logo HookLab AI" />
+        <div className="relative w-10 h-10 flex items-center justify-center">
+          <img src="/logo_hooklab.png" alt="Logo HookLab AI" />
         </div>
         <span className="text-white font-bold text-xl font-poppins tracking-wide">
           HookLab AI
