@@ -261,6 +261,15 @@ export default function HookResult({ hook, onTryAnother, onBack }: HookResultPro
     return colors[index];
   }
 
+  function handleDownload(url: string, filename: string) {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   return (
     <div className="flex-1 flex flex-col bg-black overflow-y-auto relative">
       {/* Header */}
@@ -310,15 +319,33 @@ export default function HookResult({ hook, onTryAnother, onBack }: HookResultPro
 
             {/* AI Generated Image Display */}
             {generatedImageUrl && (
-              <div className="mt-4 rounded-xl overflow-hidden border border-white/10">
+              <div className="mt-4 rounded-xl overflow-hidden border border-white/10 relative group">
                 <img src={generatedImageUrl} alt="AI Generated" className="w-full h-auto object-cover" />
+                <button
+                  onClick={() => handleDownload(generatedImageUrl, `hooklab-image-${Date.now()}.png`)}
+                  className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
+                  title="Download Image"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                </button>
               </div>
             )}
 
             {/* AI Generated Video Display */}
             {generatedVideoUrl && (
-              <div className="mt-4 rounded-xl overflow-hidden border border-white/10">
+              <div className="mt-4 rounded-xl overflow-hidden border border-white/10 relative group">
                 <video src={generatedVideoUrl} controls autoPlay loop className="w-full h-auto object-cover" />
+                <button
+                  onClick={() => handleDownload(generatedVideoUrl, `hooklab-video-${Date.now()}.mp4`)}
+                  className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
+                  title="Download Video"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                </button>
               </div>
             )}
 
