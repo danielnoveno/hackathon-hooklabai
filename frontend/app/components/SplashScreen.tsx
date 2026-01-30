@@ -1,232 +1,105 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import DomeGlobe from './DomeGlobe';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import DarkVeil from './reachbits/DarkVeil';
 
-type SplashScreenProps = {
-  onFinish: () => void;
-};
+export default function VideoSimulation({ onModelLoaded, isExiting }: { onModelLoaded?: () => void, isExiting?: boolean }) {
+  const [playVideo, setPlayVideo] = useState(false);
 
-export default function SplashScreen({ onFinish }: SplashScreenProps) {
-  const [fadeOut, setFadeOut] = useState(false);
-  const [currentZoomLevel, setCurrentZoomLevel] = useState<'globe' | 'particles' | 'threads'>('globe');
-
-  const handleZoomLevelChange = (level: 'globe' | 'particles' | 'threads') => {
-    setCurrentZoomLevel(level);
-  };
-
-  const handleGetStarted = () => {
-    setFadeOut(true);
-    setTimeout(() => onFinish(), 500);
-  };
+  useEffect(() => {
+    setPlayVideo(true);
+    if (onModelLoaded) onModelLoaded();
+  }, [onModelLoaded]);
 
   return (
-    <div className="fixed inset-0 bg-gray-900 flex items-center justify-center">
-      {/* Mini Apps Container - Mobile Size */}
-      <div 
-        className={`
-          relative w-full max-w-[430px] h-full max-h-[932px]
-          bg-black overflow-hidden
-          transition-opacity duration-500
-          shadow-2xl
-          ${fadeOut ? 'opacity-0' : 'opacity-100'}
-        `}
-        style={{ aspectRatio: '430 / 932' }}
-      >
-        {/* Aurora Background */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Base gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black via-[#0a0e1a] to-black" />
-          
-          {/* Aurora effects */}
-          <div className="absolute top-0 left-0 w-full h-full">
-            <div 
-              className="absolute top-1/4 left-1/4 w-[400px] h-[300px] bg-blue-600/20 rounded-full blur-[100px] animate-aurora-1"
-            />
-            <div 
-              className="absolute top-1/3 right-1/4 w-[350px] h-[250px] bg-indigo-600/15 rounded-full blur-[80px] animate-aurora-2"
-            />
-            <div 
-              className="absolute bottom-1/4 left-1/3 w-[300px] h-[200px] bg-purple-600/10 rounded-full blur-[70px] animate-aurora-3"
-            />
-            <div 
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] bg-cyan-500/10 rounded-full blur-[120px] animate-pulse"
-            />
-          </div>
-          
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-950/5 to-transparent opacity-50" />
-        </div>
+    <motion.div
+      initial={{ opacity: 1 }}
+      animate={{ opacity: isExiting ? 0 : 1 }}
+      transition={{ duration: 1, ease: "easeInOut" }}
+      className="relative w-full h-screen bg-[#020408] flex flex-col items-center justify-center overflow-hidden font-sans text-white"
+    >
 
-        {/* Globe Container */}
-        <div className="absolute inset-0" style={{ pointerEvents: 'auto' }}>
-          <DomeGlobe onZoomLevelChange={handleZoomLevelChange} />
-        </div>
-
-        {/* Content Overlay */}
-        <div 
-          className={`
-            absolute inset-0 flex flex-col items-center justify-center px-6
-            transition-opacity duration-500
-            pointer-events-none
-            ${currentZoomLevel === 'threads' ? 'opacity-0' : 'opacity-100'}
-          `}
-          style={{ zIndex: 100 }}
-        >
-          <div className="text-center animate-fade-in-up">
-            
-            {/* Logo */}
-            <div className="mb-6 flex justify-center pointer-events-none">
-              <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-2xl shadow-blue-500/50 animate-float">
-                <div className="w-14 h-14 rounded-full bg-black flex items-center justify-center overflow-hidden">
-                  <img 
-                    src="/logo_hooklab.jpg" 
-                    alt="Logo HookLab" 
-                    className='w-full h-full rounded-full object-cover'
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Title */}
-            <h1 className="text-white text-3xl font-bold font-poppins mb-3 tracking-tight pointer-events-none">
-              HookLab AI
-            </h1>
-
-            {/* Subtitle */}
-            <p className="text-white/60 text-sm font-medium mb-8 pointer-events-none">
-              Generate viral hooks with AI
-            </p>
-
-            {/* Get Started Button */}
-            <button
-              onClick={handleGetStarted}
-              className="group relative px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-base rounded-full overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-2xl hover:shadow-blue-500/50 cursor-pointer pointer-events-auto"
-              style={{ zIndex: 101 }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
-              
-              <span className="relative flex items-center gap-2">
-                Get Started
-                <svg 
-                  className="w-5 h-5 transition-transform group-hover:translate-x-1" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M13 7l5 5m0 0l-5 5m5-5H6" 
-                  />
-                </svg>
-              </span>
-            </button>
-
-            {/* Hint text */}
-            <p className="text-white/40 text-xs mt-6 animate-fade-in-delayed pointer-events-none">
-              Drag the globe to explore
-            </p>
-
-          </div>
-        </div>
-
-        {/* Bottom gradient */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent pointer-events-none" style={{ zIndex: 50 }} />
+      {/* 1. BACKGROUND ATMOSPHERE: DARK VEIL */}
+      <div className="absolute inset-0 z-0">
+        <DarkVeil
+          hueShift={28}
+          noiseIntensity={0}
+          scanlineIntensity={0.37}
+          speed={1.8}
+          scanlineFrequency={2.1}
+          warpAmount={0}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-60 pointer-events-none" />
       </div>
 
-      <style jsx>{`
-        @keyframes fade-in-up {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
+      {/* 2. CENTER CONTENT */}
+      {/* Diangkat sedikit (-translate-y-10) agar komposisi tetap seimbang di tengah mata */}
+      <div className="relative z-20 flex flex-col items-center justify-center w-full transform -translate-y-10">
 
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
+        {/* LOGO CONTAINER */}
+        <div className="relative w-28 h-28 flex items-center justify-center">
+          <div className="relative w-full h-full">
+            <img
+              src="/logo_hooklab.png" 
+              alt="HookLab Logo"
+              className="w-full h-full object-contain drop-shadow-[0_0_25px_rgba(59,130,246,0.6)]"
+            />
+            {/* Shine Overlay */}
+            <div
+              className="absolute inset-0 z-10 pointer-events-none mix-blend-overlay"
+              style={{
+                maskImage: 'url(/logo_hooklab.png)',
+                WebkitMaskImage: 'url(/logo_hooklab.png)',
+                maskSize: 'contain',
+                WebkitMaskSize: 'contain',
+                maskRepeat: 'no-repeat',
+                WebkitMaskRepeat: 'no-repeat',
+                maskPosition: 'center',
+                WebkitMaskPosition: 'center',
+              }}
+            >
+              <div className="w-[200%] h-full bg-gradient-to-r from-transparent via-white/80 to-transparent skew-x-[-20deg] animate-shine" />
+            </div>
+          </div>
+        </div>
 
-        @keyframes aurora-1 {
-          0%, 100% {
-            transform: translate(0, 0) scale(1);
-            opacity: 0.2;
-          }
-          33% {
-            transform: translate(30px, -20px) scale(1.1);
-            opacity: 0.25;
-          }
-          66% {
-            transform: translate(-20px, 30px) scale(0.95);
-            opacity: 0.15;
-          }
-        }
+        {/* 3. TEXT DESCRIPTION */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.8 }}
+          // UPDATE: Menggunakan mt-8 untuk memberi jarak (space) yang jelas dari logo
+          className="z-10 text-center max-w-[200px] mt-8 px-2 relative"
+        >
+          <p className="text-blue-100/70 text-[10px] leading-tight font-medium tracking-wide line-clamp-2 text-center">
+            Generate viral Farcaster hooks powered by real Base channel trends
+            with blind selection.
+          </p>
+        </motion.div>
 
-        @keyframes aurora-2 {
-          0%, 100% {
-            transform: translate(0, 0) scale(1);
-            opacity: 0.15;
-          }
-          33% {
-            transform: translate(-30px, 40px) scale(1.05);
-            opacity: 0.2;
-          }
-          66% {
-            transform: translate(40px, -15px) scale(0.9);
-            opacity: 0.12;
-          }
-        }
+        {/* 4. LOADING BAR */}
+        {/* UPDATE: Menggunakan mt-5 agar tidak terlalu mepet dengan teks */}
+        <div className="mt-5 w-10 h-[2px] bg-gray-800/50 rounded-full overflow-hidden">
+          <motion.div
+            initial={{ x: "-100%" }}
+            animate={{ x: "100%" }}
+            transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+            className="w-full h-full bg-blue-500 blur-[1px]"
+          />
+        </div>
 
-        @keyframes aurora-3 {
-          0%, 100% {
-            transform: translate(0, 0) scale(1);
-            opacity: 0.1;
-          }
-          33% {
-            transform: translate(20px, 30px) scale(1.08);
-            opacity: 0.15;
-          }
-          66% {
-            transform: translate(-35px, -20px) scale(0.92);
-            opacity: 0.08;
-          }
-        }
+      </div>
 
-        .animate-aurora-1 {
-          animation: aurora-1 20s ease-in-out infinite;
+      <style jsx global>{`
+        @keyframes shine {
+          0% { transform: translateX(-150%); }
+          100% { transform: translateX(150%); }
         }
-
-        .animate-aurora-2 {
-          animation: aurora-2 25s ease-in-out infinite;
-          animation-delay: 2s;
-        }
-
-        .animate-aurora-3 {
-          animation: aurora-3 30s ease-in-out infinite;
-          animation-delay: 4s;
-        }
-
-        .animate-fade-in-up {
-          animation: fade-in-up 1s ease-out 0.5s both;
-        }
-
-        .animate-fade-in-delayed {
-          animation: fade-in-up 1s ease-out 1.5s both;
-        }
-
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
+        .animate-shine {
+          animation: shine 2.5s infinite linear;
         }
       `}</style>
-    </div>
+    </motion.div>
   );
 }

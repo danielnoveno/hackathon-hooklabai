@@ -5,16 +5,17 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAccount } from 'wagmi';
 import toast from 'react-hot-toast';
 
-// Import Components
+// 2. IMPORT COMPONENTS
+// Asumsi file Anda ada di folder components. Sesuaikan path jika berbeda.
+import VideoSplash from './components/SplashScreen'; // File SplashScreen.tsx yang isinya VideoSimulation
+import LandingPage from './components/LandingPage';  // File LandingPage.tsx yang isinya DomeGlobe
 import UIBackground from './components/UIBackground';
 import WalletConnect from './components/WalletConnect';
 import NameInputModal from './components/NameInputModal';
 import HooksSelection from './components/HookSelection';
 import TransactionModal from './components/TransactionModal';
 import HookResult from './components/HookResult';
-import SplashScreen from './components/SplashScreen';
 
-import { TOPIC_PROMPTS, type TopicKey } from './config/topicPrompts';
 import { userStorage } from '../utils/userStorage';
 
 type Hook = {
@@ -25,30 +26,90 @@ type Hook = {
   preview: string;
 };
 
+// State untuk mengatur tampilan utama aplikasi
+type AppView = 'splash' | 'landing' | 'app';
 type AppState = 'initial' | 'selecting' | 'result';
 
 export default function Home() {
-  const { isConnected, address } = useAccount();
+  // ==========================================
+  // STATE NAVIGASI GLOBAL (Splash -> Landing -> App)
+  // ==========================================
+  const [currentView, setCurrentView] = useState<AppView>('splash');
+  const [isModelLoaded, setIsModelLoaded] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
 
+  const handleModelLoaded = useCallback(() => {
+    setIsModelLoaded(true);
+  }, []);
+
+  // Logic untuk Transisi Otomatis dari Splash ke Landing
+  useEffect(() => {
+    // Wait for BOTH splash view AND model loaded
+    if (currentView === 'splash' && isModelLoaded) {
+      // 1. Wait 3 seconds, then start exiting
+      const timer = setTimeout(() => {
+        setIsExiting(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentView, isModelLoaded]);
+
+  // Handle exiting transition
+  useEffect(() => {
+    if (isExiting) {
+      // 2. Wait 1 second for fade out, then switch view
+      const timer = setTimeout(() => {
+        setCurrentView('landing');
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isExiting]);
+
+  // Handler saat user klik "Get Started" di Landing Page
+  const handleEnterApp = () => {
+    setCurrentView('app');
+  };
+
+  // ==========================================
+  // LOGIC MAIN APP (Sama seperti sebelumnya)
+  // ==========================================
+  const { isConnected, address } = useAccount();
   const [prompt, setPrompt] = useState('');
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
   const [credits, setCredits] = useState(1000);
   const [appState, setAppState] = useState<AppState>('initial');
   const [userName, setUserName] = useState<string>('');
-
   const [generatedHooks, setGeneratedHooks] = useState<Hook[]>([]);
   const [isThinking, setIsThinking] = useState(false);
-
   const [selectedHook, setSelectedHook] = useState<Hook | null>(null);
   const [showTransactionModal, setShowTransactionModal] = useState(false);
   const [pendingHook, setPendingHook] = useState<Hook | null>(null);
-  const [showSplash, setShowSplash] = useState(true);
   const [showNameModal, setShowNameModal] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [suggestions, setSuggestions] = useState<{ name: string, prompt: string }[]>([
+    { name: 'General', prompt: 'Write a viral hook about...' },
+    { name: 'Business', prompt: 'Write a contrarian business lesson about...' }
+  ]);
 
-  // ==========================================
-  // LOGIC AI GENERATOR
-  // ==========================================
+  // Fetch Categories
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const res = await fetch('/api/categories');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.categories && Array.isArray(data.categories)) {
+            setSuggestions(data.categories);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch categories:", e);
+      }
+    }
+    fetchCategories();
+  }, []);
+
+  // Logic AI Generator
   const handleGenerateHooks = async (promptText: string) => {
     setIsThinking(true);
     const toastId = toast.loading("AI is thinking...", {
@@ -56,8 +117,6 @@ export default function Home() {
     });
 
     try {
-      console.log("Sending to API:", { category: activeTopic || 'General', userPrompt: promptText });
-
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -67,18 +126,12 @@ export default function Home() {
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Server Error: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`Server Error: ${response.status}`);
       const data = await response.json();
 
       if (data.hooks && Array.isArray(data.hooks)) {
         const formattedHooks: Hook[] = data.hooks.map((item: any, i: number) => {
           const contentText = typeof item === 'string' ? item : item.hook;
-
-          // Logic Teaser: Ambil 10 kata pertama saja
           const words = contentText.split(/\s+/);
           const previewText = words.length > 10 ? words.slice(0, 10).join(' ') + '...' : contentText;
 
@@ -93,30 +146,16 @@ export default function Home() {
 
         setGeneratedHooks(formattedHooks);
         setAppState('selecting');
-
         toast.dismiss(toastId);
         toast.success("Hooks generated successfully!");
       } else {
         throw new Error("Invalid data format from AI");
       }
-
     } catch (err) {
-      // ✅ FIX: Hapus ': any' dan gunakan casting manual
       const error = err as Error;
-
       console.error("Generate Error:", error);
       toast.dismiss(toastId);
-
-      // Cek pesan error dengan aman
-      const errorMessage = error.message || "Unknown error";
-
-      if (errorMessage.includes("500")) {
-        toast.error("Server Error (500). Check API Key or Backend Logs.");
-      } else if (errorMessage.includes("Failed to fetch")) {
-        toast.error("Connection failed. Is the server running?");
-      } else {
-        toast.error(errorMessage);
-      }
+      toast.error(error.message || "Unknown error");
     } finally {
       setIsThinking(false);
     }
@@ -130,9 +169,7 @@ export default function Home() {
     handleGenerateHooks(prompt);
   };
 
-  // ==========================================
-  // DATA USER & STORAGE
-  // ==========================================
+  // Data User & Storage
   useEffect(() => {
     if (!isConnected || !address) {
       setUserName('');
@@ -162,14 +199,8 @@ export default function Home() {
     toast.success(`Welcome, ${name}!`);
   }, [address]);
 
-  // ==========================================
-  // TRANSAKSI & NAVIGASI
-  // ==========================================
   const handleSelectHook = useCallback((hook: Hook) => {
-    if (credits <= 0) {
-      toast.error("You are out of credits!");
-      // return; // Dev mode: allow unlimited
-    }
+    if (credits <= 0) toast.error("You are out of credits!");
     const updatedHook = { ...hook, username: userName || 'Anonymous' };
     setPendingHook(updatedHook);
     setShowTransactionModal(true);
@@ -178,15 +209,12 @@ export default function Home() {
   const handleTransactionSuccess = useCallback(() => {
     if (!address) return;
     setShowTransactionModal(false);
-
-    const hasCredits = credits > 0;
-    if (hasCredits) {
+    if (credits > 0) {
       const newCredits = Math.max(0, credits - 1);
       setCredits(newCredits);
       userStorage.updateCredits(address, newCredits);
       toast.success("Transaction successful! Credit used.");
     }
-
     if (pendingHook) {
       setSelectedHook(pendingHook);
       setAppState('result');
@@ -212,36 +240,21 @@ export default function Home() {
   }, []);
 
   // ==========================================
-  // FETCH CATEGORIES (DYNAMIC)
+  // RENDER UI BERDASARKAN VIEW STATE
   // ==========================================
-  const [suggestions, setSuggestions] = useState<{ name: string, prompt: string }[]>([
-    { name: 'General', prompt: 'Write a viral hook about...' },
-    { name: 'Business', prompt: 'Write a contrarian business lesson about...' }
-  ]);
 
-  useEffect(() => {
-    async function fetchCategories() {
-      try {
-        const res = await fetch('/api/categories');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.categories && Array.isArray(data.categories)) {
-            setSuggestions(data.categories);
-          }
-        }
-      } catch (e) {
-        console.error("Failed to fetch categories:", e);
-      }
-    }
-    fetchCategories();
-  }, []);
+  // 1. TAMPILKAN SPLASH SCREEN (Video Simulation)
+  if (currentView === 'splash') {
+    return <VideoSplash onModelLoaded={handleModelLoaded} isExiting={isExiting} />;
+  }
 
-  // ==========================================
-  // RENDER UI
-  // ==========================================
-  if (showSplash) return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  // 2. TAMPILKAN LANDING PAGE (Dome Globe)
+  if (currentView === 'landing') {
+    return <LandingPage onFinish={handleEnterApp} />;
+  }
 
-  if (isConnected && !isDataLoaded) {
+  // 3. TAMPILKAN MAIN APP (Loading Data Wallet)
+  if (isConnected && !isDataLoaded && currentView === 'app') {
     return (
       <main className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-white">Loading data...</div>
@@ -249,6 +262,7 @@ export default function Home() {
     );
   }
 
+  // 4. TAMPILKAN MAIN APP (Interface Utama)
   return (
     <>
       <main className="min-h-screen flex flex-col bg-black">
@@ -264,7 +278,6 @@ export default function Home() {
                     Please Connect <br /> Wallet, First !
                   </h1>
                 </div>
-                {/* FIX TAILWIND CLASS */}
                 <div className="relative z-20 w-full px-4 pb-12 mt-auto">
                   <div className="w-full bg-white rounded-[20px] p-5 shadow-lg min-h-35 flex flex-col justify-between">
                     <div className="flex items-center"><WalletConnect isConnected={false} /></div>
@@ -281,8 +294,7 @@ export default function Home() {
               // UI UTAMA (INPUT)
               <>
                 <div className="pt-12 px-6 flex items-center gap-3">
-                  {/* FIX TAILWIND GRADIENT */}
-                  <div className="relative w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center"><div className="text-white font-bold">HL</div></div>
+                  <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center"><div className="text-white font-bold">HL</div></div>
                   <span className="text-white font-bold text-xl font-poppins tracking-wide">HookLab AI</span>
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center px-6 -mt-10">

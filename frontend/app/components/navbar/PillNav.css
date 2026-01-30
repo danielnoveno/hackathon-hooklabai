@@ -1,0 +1,144 @@
+/* components/PillNav.css */
+
+.pill-nav-container {
+  position: relative;
+  width: 100%;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  z-index: 50;
+}
+
+.pill-nav {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px; /* Jarak antar item diperkecil sedikit agar muat */
+  padding: 2px;
+  
+  /* Background Putih dengan sedikit transparansi/blur */
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  
+  border-radius: 9999px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  
+  /* Agar muat di layar kecil tanpa hamburger */
+  max-width: 95%; 
+  overflow-x: auto; /* Scroll samping jika layar terlalu kecil */
+  scrollbar-width: none; /* Firefox hide scrollbar */
+}
+
+/* Hide scrollbar for Chrome/Safari/Opera */
+.pill-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.pill-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* UKURAN DIPERBESAR DI SINI */
+  width: 3.5rem;   /* Sebelumnya 2.2rem */
+  height: 3.5rem;  /* Sebelumnya 2.2rem */
+  
+  border-radius: 50%;
+  background: transparent;
+  overflow: hidden;
+  flex-shrink: 0;
+  margin-right: 0.5rem;
+}
+
+.pill-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Memastikan logo tidak terpotong */
+}
+
+/* LIST ITEMS */
+.pill-list {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 0.25rem;
+}
+
+.pill-list li {
+  flex-shrink: 0;
+}
+
+/* ITEM LINK STYLE */
+.pill {
+  position: relative;
+  display: block;
+  padding: 0.5rem 0.85rem;
+  text-decoration: none;
+  border-radius: 9999px;
+  overflow: hidden;
+  
+  /* Text Color Hitam (karena bg putih) */
+  color: #1a1a1a;
+  font-weight: 600;
+  font-size: 0.8rem; /* Font agak kecil agar muat */
+  transition: all 0.3s ease;
+  background: transparent;
+}
+
+/* HOVER EFFECT - SHINE & DARK BG */
+.pill:hover {
+  color: #ffffff; /* Text jadi putih saat hover */
+  background: #000000; /* Background jadi hitam */
+  box-shadow: 0 0 15px rgba(0, 80, 240, 0.5); /* Glow biru */
+}
+
+/* ANIMASI SHINE (KILAUAN) SAAT HOVER */
+.pill:hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+  transform: skewX(-25deg);
+  animation: shine 0.75s;
+}
+
+@keyframes shine {
+  100% {
+    left: 125%;
+  }
+}
+
+/* ACTIVE / CLICK EFFECT - GLITCH */
+.pill:active {
+  animation: glitch-skew 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+  color: #0050f0; /* Warna biru khas tema */
+}
+
+@keyframes glitch-skew {
+  0% { transform: translate(0) }
+  20% { transform: translate(-2px, 2px) }
+  40% { transform: translate(-2px, -2px) }
+  60% { transform: translate(2px, 2px) }
+  80% { transform: translate(2px, -2px) }
+  100% { transform: translate(0) }
+}
+
+/* Label Stack (Text Styling) */
+.label-stack {
+  position: relative;
+  z-index: 10;
+}
+
+/* Hide Hamburger & Mobile Elements globally since we removed them */
+.mobile-only { display: none !important; }
