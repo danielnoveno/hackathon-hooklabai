@@ -48,12 +48,23 @@ ALTER TABLE usage_logs ENABLE ROW LEVEL SECURITY;
 
 -- Allow anonymous access for hackathon demo
 -- In production, you would want more restrictive policies
-CREATE POLICY "Allow all operations on users" ON users FOR ALL USING (true);
-CREATE POLICY "Allow all operations on quotas" ON quotas FOR ALL USING (true);
-CREATE POLICY "Allow all operations on usage_logs" ON usage_logs FOR ALL USING (true);
+do $$
+begin
+  if not exists (select * from pg_policies where policyname = 'Allow all operations on users' and tablename = 'users') then
+    CREATE POLICY "Allow all operations on users" ON users FOR ALL USING (true);
+  end if;
+
+  if not exists (select * from pg_policies where policyname = 'Allow all operations on quotas' and tablename = 'quotas') then
+    CREATE POLICY "Allow all operations on quotas" ON quotas FOR ALL USING (true);
+  end if;
+
+  if not exists (select * from pg_policies where policyname = 'Allow all operations on usage_logs' and tablename = 'usage_logs') then
+    CREATE POLICY "Allow all operations on usage_logs" ON usage_logs FOR ALL USING (true);
+  end if;
+end $$;
 
 -- Optional: Create a view for analytics
-CREATE OR REPLACE VIEW usage_analytics AS
+CREATE OR REPLACE VIEW usage_analytics WITH (security_invoker = true) AS
 SELECT 
   DATE(created_at) as date,
   COUNT(*) as total_hooks_selected,
