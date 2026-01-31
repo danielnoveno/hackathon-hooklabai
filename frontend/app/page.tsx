@@ -3,11 +3,11 @@
 // 1. IMPORT WAJIB DI ATAS
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
-import { useAccount, useSendTransaction, useWaitForTransactionReceipt, useSwitchChain, useChainId } from 'wagmi';
+import { useAccount, useSendTransaction, useWaitForTransactionReceipt, useSwitchChain, useChainId, useReadContract } from 'wagmi';
 import { parseEther } from 'viem';
 import toast from 'react-hot-toast';
 import { formatEther } from 'viem';
-import { HOOK_TOKEN_ABI, HOOKLAB_REWARDS_ABI } from './config/abi';
+import { HOOK_TOKEN_ABI } from './config/abi';
 
 // IMPORT DRIVER.JS
 import { driver } from "driver.js";
@@ -282,13 +282,7 @@ export default function Home() {
   }, [appState, isTourActive, address]);
 
 
-  const handleNameSubmit = useCallback((name: string) => {
-    if (!address) return;
-    setUserName(name);
-    userStorage.saveUserData(address, { name, credits: 1000 });
-    setShowNameModal(false);
-    toast.success(`Welcome, ${name}!`);
-  }, [address]);
+
 
   // Logic AI Generator
   const handleGenerateHooks = async (promptText: string) => {
@@ -566,28 +560,28 @@ export default function Home() {
                       staggerDelay={0.05}
                     />
                   </div>
-                  
-                  <div className="h-0"></div> 
+
+                  <div className="h-0"></div>
                 </div>
 
                 <div className="relative z-20 w-full max-w-2xl mx-auto px-4 pb-6 mt-auto">
                   {/* Compact Loyalty Progress Bar precisely above Prompt Box */}
                   <div className="w-full mb-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
                     <div className="relative group overflow-hidden bg-white/[0.03] backdrop-blur-md border border-white/5 rounded-xl px-4 py-2 flex items-center justify-between gap-4">
-                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest whitespace-nowrap">Loyalty Tracker</span>
-                            <div className="h-1 w-1 rounded-full bg-indigo-400 animate-pulse" />
-                            <span className="text-[10px] text-white/30 font-medium italic truncate">Persists on-chain</span>
-                         </div>
-                         <div className="flex items-center gap-2">
-                            <span className="text-[8px] text-white/20 uppercase tracking-tighter">1 Pay = 100 HOOK</span>
-                            <span className="text-sm font-mono font-bold text-indigo-400">
-                              {Number(formatEther(hookBalance || 0n)).toFixed(0)}/500 $HOOK
-                            </span>
-                         </div>
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest whitespace-nowrap">Loyalty Tracker</span>
+                        <div className="h-1 w-1 rounded-full bg-indigo-400 animate-pulse" />
+                        <span className="text-[10px] text-white/30 font-medium italic truncate">Persists on-chain</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[8px] text-white/20 uppercase tracking-tighter">1 Pay = 100 HOOK</span>
+                        <span className="text-sm font-mono font-bold text-indigo-400">
+                          {Number(formatEther(hookBalance || 0n)).toFixed(0)}/500 $HOOK
+                        </span>
+                      </div>
 
-                       {/* Subtle Shimmer */}
-                       <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] bg-gradient-to-r from-transparent via-white/[0.02] to-transparent transition-transform duration-1000 pointer-events-none" />
+                      {/* Subtle Shimmer */}
+                      <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] bg-gradient-to-r from-transparent via-white/[0.02] to-transparent transition-transform duration-1000 pointer-events-none" />
                     </div>
                   </div>
 
@@ -615,32 +609,32 @@ export default function Home() {
                     </div>
 
                     <div className="flex items-center justify-between mt-3 px-2">
-                       <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
-                          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                          <span>AI Ready</span>
-                       </div>
-                       
-                       <div className="flex items-center gap-3">
-                          <button 
-                            onClick={() => setShowHistory(true)}
-                            className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all tooltip tooltip-left"
-                            data-tip="History"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                          </button>
-                          
-                          <div className="h-4 w-[1px] bg-white/10"></div>
-                          
-                          <div className="flex items-center gap-2 text-gray-400 text-sm">
-                             <WalletConnect isConnected={true} />
-                             <div className="flex flex-col items-end gap-1">
-                                <span className="bg-white/5 px-2 py-0.5 rounded-md border border-white/5 text-[10px] font-mono text-blue-400">
-                                  {credits}/5 Credits
-                                </span>
-                             </div>
+                      <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
+                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        <span>AI Ready</span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => setShowHistory(true)}
+                          className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all tooltip tooltip-left"
+                          data-tip="History"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </button>
+
+                        <div className="h-4 w-[1px] bg-white/10"></div>
+
+                        <div className="flex items-center gap-2 text-gray-400 text-sm">
+                          <WalletConnect isConnected={true} />
+                          <div className="flex flex-col items-end gap-1">
+                            <span className="bg-white/5 px-2 py-0.5 rounded-md border border-white/5 text-[10px] font-mono text-blue-400">
+                              {credits}/5 Credits
+                            </span>
                           </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1077,7 +1071,7 @@ function HookResult({ hook, onTryAnother, onBack, initialHistoryId }: HookResult
                   onClick={handleShare}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl transition-all font-medium shadow-lg hover:shadow-blue-500/30 active:scale-[0.98]"
                 >
-                  
+
                   Post
                 </button>
               </div>

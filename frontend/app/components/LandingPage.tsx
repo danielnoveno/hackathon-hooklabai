@@ -401,7 +401,6 @@ export default function LandingPage({ onFinish }: LandingPageProps) {
         {/* --- FAQ SECTION --- */}
         <FAQ />
 
-        {/* --- FOOTER SECTION --- */}
         <Footer />
 
       </div>

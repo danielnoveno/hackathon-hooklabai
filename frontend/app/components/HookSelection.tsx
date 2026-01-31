@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { DUMMY_HOOKS } from '../data/dummyHooks';
 import type { TopicKey } from '../config/topicPrompts';
-import PrismaticBurst from './PrismaticBurst';
+import PrismaticBurst from './reachbits/PrismaticBurst';
 
 type Hook = {
   id: string;

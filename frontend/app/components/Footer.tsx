@@ -17,7 +17,7 @@ const Footer: FC = (): ReactElement => {
         },
         {
             icon: <Globe className="w-5 h-5" />,
-            href: 'https://your-app-url.com',
+            href: 'https://minikit-test-hooklabai.vercel.app',
             label: 'Live Demo'
         },
     ];

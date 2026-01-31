@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: 'HookLab AI',
     description: 'Generate viral hooks with AI',
     icons: {
-      icon: '/minikit-logo.png',
+      icon: '/logo_hooklab.png',
       shortcut: '/minikit-logo.png',
       apple: '/minikit-logo.png',
     },
