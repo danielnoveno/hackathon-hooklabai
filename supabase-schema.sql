@@ -72,3 +72,35 @@ SELECT
 FROM usage_logs
 GROUP BY DATE(created_at)
 ORDER BY date DESC;
+
+-- History table
+CREATE TABLE IF NOT EXISTS history (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  wallet_address TEXT NOT NULL,
+  prompt TEXT NOT NULL,
+  media_url TEXT, -- Nullable because initially just text is saved
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Fix for existing tables where media_url might be NOT NULL
+DO $$
+BEGIN
+    ALTER TABLE history ALTER COLUMN media_url DROP NOT NULL;
+EXCEPTION
+    WHEN OTHERS THEN NULL;
+END $$;
+
+-- Create index on wallet_address and created_at for history
+CREATE INDEX IF NOT EXISTS idx_history_wallet ON history(wallet_address);
+CREATE INDEX IF NOT EXISTS idx_history_created ON history(created_at DESC);
+
+-- Enable RLS on history
+ALTER TABLE history ENABLE ROW LEVEL SECURITY;
+
+-- Allow anonymous access for history (hackathon demo)
+do $$
+begin
+  if not exists (select * from pg_policies where policyname = 'Allow all operations on history' and tablename = 'history') then
+    CREATE POLICY "Allow all operations on history" ON history FOR ALL USING (true);
+  end if;
+end $$;

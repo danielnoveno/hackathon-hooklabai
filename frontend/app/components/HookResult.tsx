@@ -18,11 +18,16 @@ type HookResultProps = {
   hook: Hook;
   onTryAnother: () => void;
   onBack: () => void;
+  initialHistoryId?: string; // New Prop
 };
 
-export default function HookResult({ hook, onTryAnother, onBack }: HookResultProps) {
+export default function HookResult({ hook, onTryAnother, onBack, initialHistoryId }: HookResultProps) {
   const [copied, setCopied] = useState(false);
   const [showExitWarning, setShowExitWarning] = useState(false);
+  
+  // Full content untuk display
+  const fullContent = hook.content;
+  
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
@@ -39,8 +44,6 @@ export default function HookResult({ hook, onTryAnother, onBack }: HookResultPro
   const { isLoading: isWaitingReceipt, isSuccess: isPaymentSuccess } = useWaitForTransactionReceipt({
     hash: paymentHash,
   });
-
-  // ... (lines 37-67 are unchanged, assuming user context isn't needed here) 
 
   // Watch for transaction hash updates
   useEffect(() => {
@@ -75,16 +78,16 @@ export default function HookResult({ hook, onTryAnother, onBack }: HookResultPro
   // Generate hashtags (Dynamic based on topic)
   const hashtags = [`#${hook.topic.replace(/\s+/g, '')}`, '#Web3', '#HookLab', '#Farcaster'];
 
-  // Full content untuk display
-  const fullContent = hook.content;
-
   const generateImageAfterPayment = async (): Promise<string | null> => {
     setIsGeneratingImage(true);
     try {
       const response = await fetch('/api/generate-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: fullContent }),
+        body: JSON.stringify({ 
+            prompt: fullContent,
+            historyId: initialHistoryId // Pass ID for update
+        }),
       });
 
       const data = await response.json();
@@ -275,15 +278,15 @@ export default function HookResult({ hook, onTryAnother, onBack }: HookResultPro
       {/* Header */}
       <div className="pt-12 px-6 pb-6 flex items-center gap-3">
         <button
-          onClick={() => setShowExitWarning(true)}
+          onClick={onBack}
           className="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white transition-colors"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-          <img src="/logo_hooklab.jpg" alt="Logo HookLab AI" />
+        <div className="relative w-12 h-12 flex items-center justify-center">
+          <img src="/logo_glassmorp.png" alt="Logo HookLab AI" className="w-full h-full object-contain" />
         </div>
         <span className="text-white font-bold text-xl font-poppins tracking-wide">
           HookLab AI
@@ -384,7 +387,7 @@ export default function HookResult({ hook, onTryAnother, onBack }: HookResultPro
             <div className="flex gap-3">
               <button
                 onClick={handleCopy}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#2A2A2A] hover:bg-[#333333] text-white rounded-xl transition-colors font-medium"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 text-white rounded-xl transition-all font-medium active:scale-[0.98]"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -393,10 +396,10 @@ export default function HookResult({ hook, onTryAnother, onBack }: HookResultPro
               </button>
               <button
                 onClick={handleShare}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#7C65C1] hover:bg-[#6952A3] text-white rounded-xl transition-colors font-medium"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl transition-all font-medium shadow-lg hover:shadow-blue-500/30 active:scale-[0.98]"
               >
-                <img src="https://warpcast.com/favicon.ico" alt="Warpcast" className="w-5 h-5 rounded-full bg-white" />
-                Post on Warpcast
+                <img src="https://warpcast.com/favicon.ico" alt="Base" className="w-5 h-5 rounded-full bg-white" />
+                Post on Base
               </button>
             </div>
 
@@ -405,7 +408,7 @@ export default function HookResult({ hook, onTryAnother, onBack }: HookResultPro
               <button
                 onClick={handleGenerateImage}
                 disabled={isGeneratingImage || isConfirmingWallet || isPaying || isWaitingReceipt}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] active:scale-[0.98]"
               >
                 {isGeneratingImage ? (
                   <>
@@ -445,7 +448,7 @@ export default function HookResult({ hook, onTryAnother, onBack }: HookResultPro
               <button
                 onClick={handleGenerateVideo}
                 disabled={isGeneratingVideo}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white rounded-xl transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] active:scale-[0.98]"
               >
                 {isGeneratingVideo ? (
                   <>
@@ -472,60 +475,12 @@ export default function HookResult({ hook, onTryAnother, onBack }: HookResultPro
       <div className="px-6 pb-12">
         <button
           onClick={onTryAnother}
-          className="w-full px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-lg transition-colors"
+          className="w-full px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 text-white rounded-2xl font-bold text-lg transition-all active:scale-[0.98] shadow-lg"
         >
           Try Another Hooks
         </button>
-
       </div>
 
-      {/* Warning Dialog Modal */}
-      {showExitWarning && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#1A1A1A] w-full max-w-sm rounded-2xl border border-white/10 p-6 shadow-2xl flex flex-col gap-4">
-            <div className="text-center">
-              <h3 className="text-xl font-bold text-white mb-2">Wait a second! ⚠️</h3>
-              <p className="text-gray-300 text-sm">
-                If you go back now, you will lose this hook and have to use another credit to get it back.
-                <br /><br />
-                Make sure you <b>Copy</b> or <b>Post</b> it before leaving!
-              </p>
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                onClick={handleCopy}
-                className="flex-1 py-3 bg-[#2A2A2A] hover:bg-[#333333] text-white rounded-xl transition-colors font-medium text-sm"
-              >
-                {copied ? 'Copied!' : 'Copy Text'}
-              </button>
-              <button
-                onClick={handleShare}
-                className="flex-1 py-3 bg-[#7C65C1] hover:bg-[#6952A3] text-white rounded-xl transition-colors font-medium text-sm"
-              >
-                Post Now
-              </button>
-            </div>
-
-            <div className="h-px bg-white/10 w-full my-1"></div>
-
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={onBack}
-                className="w-full py-3 bg-red-500/20 hover:bg-red-500/30 text-red-500 border border-red-500/50 rounded-xl transition-colors font-bold text-sm"
-              >
-                Yes, Go Back Anyway
-              </button>
-              <button
-                onClick={() => setShowExitWarning(false)}
-                className="w-full py-3 text-gray-400 hover:text-white transition-colors font-medium text-sm"
-              >
-                Cancel, Stay Here
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

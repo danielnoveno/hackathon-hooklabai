@@ -2,11 +2,35 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from './providers';
 import { Toaster } from 'react-hot-toast'; // Pastikan sudah install: npm install react-hot-toast
+import FarcasterSDK from '@/components/FarcasterSDK';
 
-export const metadata: Metadata = {
-  title: 'HookLab AI',
-  description: 'Generate viral hooks with AI',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: 'HookLab AI',
+    description: 'Generate viral hooks with AI',
+    icons: {
+      icon: '/logo_hooklab.png',
+      shortcut: '/logo_hooklab.png',
+      apple: '/logo_hooklab.png',
+    },
+    other: {
+      'fc:miniapp': JSON.stringify({
+        version: 'next',
+        imageUrl: 'https://hooklab.ai/og.png', // Fallback image
+        button: {
+          title: 'Launch HookLab AI',
+          action: {
+            type: 'launch_miniapp',
+            name: 'HookLab AI',
+            url: 'https://hooklab.ai',
+            splashImageUrl: 'https://hooklab.ai/logo_hooklab.png',
+            splashBackgroundColor: '#000000',
+          },
+        },
+      }),
+    },
+  };
+}
 
 export default function RootLayout({
   children,
@@ -17,9 +41,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={`antialiased`}>
         <Providers>
+          <FarcasterSDK />
           {/* Main Container Mini App */}
           <div className="mx-auto max-w-[430px] min-h-screen bg-black relative shadow-2xl overflow-hidden">
-            
+
             {/* SETUP TOAST KHUSUS MINI APP */}
             <Toaster
               position="top-center"

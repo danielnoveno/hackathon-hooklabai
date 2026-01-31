@@ -8,87 +8,83 @@ export type DummyHook = {
 };
 
 export const DUMMY_HOOKS: Record<TopicKey, DummyHook[]> = {
-  Tech: [
+  'NFT': [
     {
-      id: 'tech-1',
-      topic: 'Tech',
-      preview: 'AI won’t replace you. Someone using AI will.',
+      id: 'nft-1',
+      topic: 'NFT',
+      preview: 'I just minted a custom Warplet with DNA generated from my Farcaster profile.',
       content:
-        "AI won’t replace you.\n\nSomeone using AI will.\n\nThat’s the uncomfortable truth most people ignore."
-    },
-    {
-      id: 'tech-2',
-      topic: 'Tech',
-      preview: 'Most people learn AI the wrong way.',
-      content:
-        "Most people learn AI the wrong way.\n\nThey start with tools.\nThey should start with problems."
+        "I just minted a custom Warplet with DNA generated from my Farcaster profile. Join The Warplet family!"
     }
   ],
 
-  Finance: [
+  'Web3 Update': [
     {
-      id: 'finance-1',
-      topic: 'Finance',
-      preview: 'Saving money won’t make you rich.',
+      id: 'web3-1',
+      topic: 'Web3 Update',
+      preview: 'Farcaster now supports Solana!',
       content:
-        "Saving money won’t make you rich.\n\nUnderstanding leverage will."
-    },
-    {
-      id: 'finance-2',
-      topic: 'Finance',
-      preview: 'Your salary is the slowest way to build wealth.',
-      content:
-        "Your salary is the slowest way to build wealth.\n\nBut nobody tells you that early."
+        "Farcaster now supports Solana!\n\n- Starting today, wallet and mini apps work with Solana\n- Swap into any Solana token with instant bridging from other chains\n- Fund $10 of SOL to increase your chance for upcoming airdrops"
     }
   ],
 
-  Business: [
+  'Platform Update': [
     {
-      id: 'business-1',
-      topic: 'Business',
-      preview: 'Most businesses fail for one boring reason.',
+      id: 'platform-1',
+      topic: 'Platform Update',
+      preview: 'Update: Farcaster Rewards are changing',
       content:
-        "Most businesses fail for one boring reason.\n\nThey never talk to their customers."
+        "Update: Farcaster Rewards are changing\n\nTomorrow will be the last day for current version of creator rewards. This experiment started a year ago and has paid out $1M+ to creators who casted on Farcaster. \n\nWhile this had some success, it's not aligned with our new direction. We will be launching a new experiment soon to replace the current program."
     }
   ],
 
-  Holiday: [
+  'Seasonal Greeting': [
     {
-      id: 'holiday-1',
-      topic: 'Holiday',
-      preview: 'The best trips are never perfectly planned.',
+      id: 'seasonal-1',
+      topic: 'Seasonal Greeting',
+      preview: 'Happy holidays, from Base',
       content:
-        "The best trips are never perfectly planned.\n\nThey’re felt, not scheduled."
+        "Happy holidays, from Base"
     }
   ],
 
-  Travel: [
+  'Founder Profile': [
     {
-      id: 'travel-1',
-      topic: 'Travel',
-      preview: 'Travel doesn’t change you. Reflection does.',
+      id: 'founder-1',
+      topic: 'Founder Profile',
+      preview: 'Meet @macedo.eth, co-founder of @talent',
       content:
-        "Travel doesn’t change you.\n\nReflection does."
+        "Meet @macedo.eth, co-founder of \n@talent\n\nWhat started as a side experiment with crypto quickly became an obsession, leading him to build the reputation layer for builders\n\nThis is his story"
     }
   ],
 
-  Lifestyle: [
+  'Inspiration': [
     {
-      id: 'lifestyle-1',
-      topic: 'Lifestyle',
-      preview: 'Your routine shapes your future.',
+      id: 'inspiration-1',
+      topic: 'Inspiration',
+      preview: 'we are entering a new chapter',
       content:
-        "Your routine shapes your future.\n\nChange it intentionally."
+        "we are entering a new chapter and with the new chapter comes new opportunity.\n\nours to seize."
     }
   ],
 
-  Health: [
+  'Community': [
     {
-      id: 'health-1',
-      topic: 'Health',
-      preview: 'Being healthy is mostly boring.',
+      id: 'community-1',
+      topic: 'Community',
+      preview: 'Community is everything.',
       content:
-        "Being healthy is mostly boring.\n\nThat’s why most people quit."
+        "Community is everything.\n\nBuild it, nurture it, and it will take care of you."
+    }
+  ],
+
+  'Product Update': [
+    {
+      id: 'product-1',
+      topic: 'Product Update',
+      preview: 'We just shipped a clear new feature.',
+      content:
+        "We just shipped a clear new feature.\n\nCheck out the changelog for details."
     }
   ]
 };

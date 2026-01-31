@@ -18,7 +18,7 @@ async function getSmartContext(userCategory: string): Promise<string> {
 
     let query = supabase
       .from('posts')
-      .select('text, total_engagement, author_display_name, category') // Added category to select, though it might not be in schema based on user description, checking schema...
+      .select('text, total_engagement, author_display_name')
       // User said schema:
       // CREATE TABLE IF NOT EXISTS public.posts ( ... text, total_engagement ... )
       // No category column in the NEW schema provided by user in the prompt.
