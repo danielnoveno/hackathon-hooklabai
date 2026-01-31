@@ -1,122 +1,113 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
+interface IERC20 {
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    function transfer(address to, uint256 amount) external returns (bool);
+    function balanceOf(address account) external view returns (uint256);
+}
+
+interface IHookToken is IERC20 {
+    function mint(address to, uint256 amount) external;
+}
+
 /**
  * @title HookLabSubscription
  * @notice Handles monthly subscription payments for HookLab AI premium access
- * @dev This contract ONLY manages subscriptions and premium status.
- *      It does NOT handle: AI, quota, or content.
+ * @dev Supports both ETH and $HOOK token payments. Implements Loyalty Rewards.
  */
 contract HookLabSubscription {
     // ============ State Variables ============
     
-    /// @notice Monthly subscription price (0.001 ETH for hackathon demo)
-    uint256 public constant MONTHLY_PRICE = 0.001 ether;
-    
-    /// @notice Duration of one month in seconds (30 days)
+    uint256 public constant MONTHLY_PRICE_ETH = 0.001 ether;
+    uint256 public constant MONTHLY_PRICE_HOOK = 500 * 10**18; // 500 HOOK tokens
+    uint256 public constant REWARD_PER_ETH_SUB = 100 * 10**18; // 100 HOOK cashback
     uint256 public constant MONTH_DURATION = 30 days;
     
-    /// @notice Mapping of user address to premium expiry timestamp
+    IHookToken public immutable hookToken;
     mapping(address => uint256) public premiumExpiry;
-    
-    /// @notice Contract owner (for withdrawals)
     address public owner;
     
     // ============ Events ============
     
-    /// @notice Emitted when a user subscribes
-    /// @param user Address of the subscriber
-    /// @param expiry Timestamp when premium expires
-    /// @param amount Amount paid
-    event Subscribed(address indexed user, uint256 expiry, uint256 amount);
-    
-    /// @notice Emitted when owner withdraws funds
-    /// @param owner Address of the owner
-    /// @param amount Amount withdrawn
-    event Withdrawn(address indexed owner, uint256 amount);
+    event Subscribed(address indexed user, uint256 expiry, uint256 amount, bool isToken);
+    event Withdrawn(address indexed owner, uint256 amount, bool isToken);
     
     // ============ Errors ============
     
     error InsufficientPayment();
     error NotOwner();
     error WithdrawalFailed();
+    error TransferFailed();
     
     // ============ Constructor ============
     
-    constructor() {
+    constructor(address _token) {
         owner = msg.sender;
+        hookToken = IHookToken(_token);
     }
     
     // ============ External Functions ============
     
     /**
-     * @notice Subscribe to monthly premium access
-     * @dev Extends existing subscription or starts new one
-     *      Follows x402 payment standard (simple payable function)
+     * @notice Subscribe using ETH and earn 100 $HOOK (Loyalty Reward)
      */
     function subscribeMonthly() external payable {
-        if (msg.value < MONTHLY_PRICE) {
+        if (msg.value < MONTHLY_PRICE_ETH) {
             revert InsufficientPayment();
         }
+        _extendSubscription(msg.sender, MONTH_DURATION);
         
-        uint256 currentExpiry = premiumExpiry[msg.sender];
-        uint256 newExpiry;
-        
-        // If already premium, extend from current expiry
-        // Otherwise, extend from now
-        if (currentExpiry > block.timestamp) {
-            newExpiry = currentExpiry + MONTH_DURATION;
-        } else {
-            newExpiry = block.timestamp + MONTH_DURATION;
+        // LOYALTY REWARD: Mint 100 $HOOK to the user
+        try hookToken.mint(msg.sender, REWARD_PER_ETH_SUB) {
+            // Success
+        } catch {
+            // If minting fails (e.g. role not set), we still allow the sub to process
         }
         
-        premiumExpiry[msg.sender] = newExpiry;
-        
-        emit Subscribed(msg.sender, newExpiry, msg.value);
+        emit Subscribed(msg.sender, premiumExpiry[msg.sender], msg.value, false);
+    }
+
+    /**
+     * @notice Subscribe using $HOOK tokens (Redeem Loyalty)
+     */
+    function subscribeWithToken() external {
+        bool success = hookToken.transferFrom(msg.sender, address(this), MONTHLY_PRICE_HOOK);
+        if (!success) revert TransferFailed();
+
+        _extendSubscription(msg.sender, MONTH_DURATION);
+        emit Subscribed(msg.sender, premiumExpiry[msg.sender], MONTHLY_PRICE_HOOK, true);
     }
     
-    /**
-     * @notice Check if a user has active premium subscription
-     * @param user Address to check
-     * @return bool True if user is premium, false otherwise
-     */
+    function _extendSubscription(address user, uint256 duration) internal {
+        uint256 currentExpiry = premiumExpiry[user];
+        if (currentExpiry > block.timestamp) {
+            premiumExpiry[user] = currentExpiry + duration;
+        } else {
+            premiumExpiry[user] = block.timestamp + duration;
+        }
+    }
+
     function isPremium(address user) external view returns (bool) {
         return premiumExpiry[user] > block.timestamp;
     }
     
-    /**
-     * @notice Get premium expiry timestamp for a user
-     * @param user Address to check
-     * @return uint256 Expiry timestamp (0 if never subscribed)
-     */
+    function withdrawETH() external {
+        if (msg.sender != owner) revert NotOwner();
+        uint256 balance = address(this).balance;
+        (bool success, ) = owner.call{value: balance}("");
+        if (!success) revert WithdrawalFailed();
+        emit Withdrawn(owner, balance, false);
+    }
+
+    function withdrawTokens() external {
+        if (msg.sender != owner) revert NotOwner();
+        uint256 balance = hookToken.balanceOf(address(this));
+        if (!hookToken.transfer(owner, balance)) revert TransferFailed();
+        emit Withdrawn(owner, balance, true);
+    }
+
     function getExpiry(address user) external view returns (uint256) {
         return premiumExpiry[user];
-    }
-    
-    /**
-     * @notice Owner can withdraw collected subscription fees
-     * @dev Only callable by contract owner
-     */
-    function withdraw() external {
-        if (msg.sender != owner) {
-            revert NotOwner();
-        }
-        
-        uint256 balance = address(this).balance;
-        
-        (bool success, ) = owner.call{value: balance}("");
-        if (!success) {
-            revert WithdrawalFailed();
-        }
-        
-        emit Withdrawn(owner, balance);
-    }
-    
-    /**
-     * @notice Get contract balance
-     * @return uint256 Current contract balance
-     */
-    function getBalance() external view returns (uint256) {
-        return address(this).balance;
     }
 }

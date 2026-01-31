@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { useAccount, useSendTransaction, useWaitForTransactionReceipt, useSwitchChain, useChainId } from 'wagmi';
 import { parseEther } from 'viem';
 import toast from 'react-hot-toast';
+import { formatEther } from 'viem';
+import { HOOK_TOKEN_ABI, HOOKLAB_REWARDS_ABI } from './config/abi';
 
 // IMPORT DRIVER.JS
 import { driver } from "driver.js";
@@ -104,7 +106,7 @@ export default function Home() {
   const { isConnected, address } = useAccount();
   const [prompt, setPrompt] = useState('');
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
-  const [credits, setCredits] = useState(1000);
+  const [credits, setCredits] = useState(5);
   const [appState, setAppState] = useState<AppState>('initial');
   const [userName, setUserName] = useState<string>('');
   const [generatedHooks, setGeneratedHooks] = useState<Hook[]>([]);
@@ -120,6 +122,23 @@ export default function Home() {
     { name: 'General', prompt: 'Write a viral hook about...' },
     { name: 'Business', prompt: 'Write a contrarian business lesson about...' }
   ]);
+
+  const tokenAddress = process.env.NEXT_PUBLIC_TOKEN_ADDRESS as `0x${string}`;
+  const rewardsAddress = process.env.NEXT_PUBLIC_REWARDS_ADDRESS as `0x${string}`;
+
+  // TOKEN HOOKS
+  const { data: hookBalance, refetch: refetchBalance } = useReadContract({
+    address: tokenAddress,
+    abi: HOOK_TOKEN_ABI,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+  });
+
+  // Automatically refetch balance periodically or after actions
+  useEffect(() => {
+    const interval = setInterval(() => refetchBalance(), 10000);
+    return () => clearInterval(interval);
+  }, [refetchBalance]);
 
   // Fetch Categories
   useEffect(() => {
@@ -350,11 +369,19 @@ export default function Home() {
       setShowNameModal(false);
     } else {
       setUserName('');
-      setCredits(1000);
+      setCredits(5);
       setShowNameModal(true);
     }
     setIsDataLoaded(true);
   }, [isConnected, address]);
+
+  const handleNameSubmit = useCallback((name: string) => {
+    if (!address) return;
+    setUserName(name);
+    userStorage.saveUserData(address, { name, credits: 5 });
+    setShowNameModal(false);
+    toast.success(`Welcome, ${name}!`);
+  }, [address]);
 
   const handleSelectHook = useCallback((hook: Hook) => {
     if (isTourActive && driverObj.current) driverObj.current.destroy();
@@ -539,11 +566,32 @@ export default function Home() {
                       staggerDelay={0.05}
                     />
                   </div>
-
-                  <div className="h-8"></div>
+                  
+                  <div className="h-0"></div> 
                 </div>
 
                 <div className="relative z-20 w-full max-w-2xl mx-auto px-4 pb-6 mt-auto">
+                  {/* Compact Loyalty Progress Bar precisely above Prompt Box */}
+                  <div className="w-full mb-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                    <div className="relative group overflow-hidden bg-white/[0.03] backdrop-blur-md border border-white/5 rounded-xl px-4 py-2 flex items-center justify-between gap-4">
+                       <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest whitespace-nowrap">Loyalty Tracker</span>
+                            <div className="h-1 w-1 rounded-full bg-indigo-400 animate-pulse" />
+                            <span className="text-[10px] text-white/30 font-medium italic truncate">Persists on-chain</span>
+                         </div>
+                         <div className="flex items-center gap-2">
+                            <span className="text-[8px] text-white/20 uppercase tracking-tighter">1 Pay = 100 HOOK</span>
+                            <span className="text-sm font-mono font-bold text-indigo-400">
+                              {Number(formatEther(hookBalance || 0n)).toFixed(0)}/500 $HOOK
+                            </span>
+                         </div>
+
+                       {/* Subtle Shimmer */}
+                       <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] bg-gradient-to-r from-transparent via-white/[0.02] to-transparent transition-transform duration-1000 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  {/* GLASS PROMPT BOX - More transparent, lighter border */}
                   <div className="w-full bg-white/5 border border-white/10 rounded-[24px] p-2 shadow-2xl backdrop-blur-md">
 
                     {/* ID UNTUK TOUR STEP 2 */}
@@ -567,18 +615,32 @@ export default function Home() {
                     </div>
 
                     <div className="flex items-center justify-between mt-3 px-2">
-                      {/* Footer Elements (AI Ready, Buttons, etc) */}
-                      <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
-                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        <span>AI Ready</span>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        {/* History button moved to header */}
-                        <div className="flex items-center gap-2 text-gray-400 text-sm">
-                          <WalletConnect isConnected={true} />
-                          <span className="bg-white/5 px-2 py-1 rounded-md border border-white/5 text-xs font-mono">{credits}/5</span>
-                        </div>
+                       <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
+                          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                          <span>AI Ready</span>
+                       </div>
+                       
+                       <div className="flex items-center gap-3">
+                          <button 
+                            onClick={() => setShowHistory(true)}
+                            className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all tooltip tooltip-left"
+                            data-tip="History"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </button>
+                          
+                          <div className="h-4 w-[1px] bg-white/10"></div>
+                          
+                          <div className="flex items-center gap-2 text-gray-400 text-sm">
+                             <WalletConnect isConnected={true} />
+                             <div className="flex flex-col items-end gap-1">
+                                <span className="bg-white/5 px-2 py-0.5 rounded-md border border-white/5 text-[10px] font-mono text-blue-400">
+                                  {credits}/5 Credits
+                                </span>
+                             </div>
+                          </div>
                       </div>
                     </div>
                   </div>

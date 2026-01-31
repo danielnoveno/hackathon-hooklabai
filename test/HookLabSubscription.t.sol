@@ -3,9 +3,11 @@ pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
 import {HookLabSubscription} from "../src/HookLabSubscription.sol";
+import {HookToken} from "../src/HookToken.sol";
 
 contract HookLabSubscriptionTest is Test {
     HookLabSubscription public subscription;
+    HookToken public token;
     
     address public owner;
     address public user1;
@@ -14,15 +16,19 @@ contract HookLabSubscriptionTest is Test {
     uint256 constant MONTHLY_PRICE = 0.001 ether;
     uint256 constant MONTH_DURATION = 30 days;
     
-    event Subscribed(address indexed user, uint256 expiry, uint256 amount);
-    event Withdrawn(address indexed owner, uint256 amount);
+    event Subscribed(address indexed user, uint256 expiry, uint256 amount, bool isToken);
+    event Withdrawn(address indexed owner, uint256 amount, bool isToken);
     
     function setUp() public {
         owner = address(this);
         user1 = makeAddr("user1");
         user2 = makeAddr("user2");
         
-        subscription = new HookLabSubscription();
+        token = new HookToken();
+        subscription = new HookLabSubscription(address(token));
+        
+        // Grant minter role to subscription
+        token.addMinter(address(subscription));
         
         // Fund test users
         vm.deal(user1, 10 ether);
@@ -40,7 +46,7 @@ contract HookLabSubscriptionTest is Test {
         uint256 expectedExpiry = block.timestamp + MONTH_DURATION;
         
         vm.expectEmit(true, false, false, true);
-        emit Subscribed(user1, expectedExpiry, MONTHLY_PRICE);
+        emit Subscribed(user1, expectedExpiry, MONTHLY_PRICE, false);
         
         subscription.subscribeMonthly{value: MONTHLY_PRICE}();
         
@@ -82,7 +88,7 @@ contract HookLabSubscriptionTest is Test {
         subscription.subscribeMonthly{value: 1 ether}();
         
         assertTrue(subscription.isPremium(user1));
-        assertEq(subscription.getBalance(), 1 ether);
+        assertEq(address(subscription).balance, 1 ether);
         
         vm.stopPrank();
     }
@@ -146,14 +152,14 @@ contract HookLabSubscriptionTest is Test {
         subscription.subscribeMonthly{value: MONTHLY_PRICE}();
         
         uint256 ownerBalanceBefore = owner.balance;
-        uint256 contractBalance = subscription.getBalance();
+        uint256 contractBalance = address(subscription).balance;
         
         vm.expectEmit(true, false, false, true);
-        emit Withdrawn(owner, contractBalance);
+        emit Withdrawn(owner, contractBalance, false);
         
-        subscription.withdraw();
+        subscription.withdrawETH();
         
-        assertEq(subscription.getBalance(), 0);
+        assertEq(address(subscription).balance, 0);
         assertEq(owner.balance, ownerBalanceBefore + contractBalance);
     }
     
@@ -163,7 +169,7 @@ contract HookLabSubscriptionTest is Test {
         
         vm.prank(user2);
         vm.expectRevert(HookLabSubscription.NotOwner.selector);
-        subscription.withdraw();
+        subscription.withdrawETH();
     }
     
     function test_Withdraw_MultipleSubscriptions() public {
@@ -173,11 +179,11 @@ contract HookLabSubscriptionTest is Test {
         vm.prank(user2);
         subscription.subscribeMonthly{value: MONTHLY_PRICE}();
         
-        assertEq(subscription.getBalance(), MONTHLY_PRICE * 2);
+        assertEq(address(subscription).balance, MONTHLY_PRICE * 2);
         
-        subscription.withdraw();
+        subscription.withdrawETH();
         
-        assertEq(subscription.getBalance(), 0);
+        assertEq(address(subscription).balance, 0);
     }
     
     // ============ Edge Cases ============
@@ -204,12 +210,12 @@ contract HookLabSubscriptionTest is Test {
     }
     
     function test_GetBalance_ReturnsCorrectAmount() public {
-        assertEq(subscription.getBalance(), 0);
+        assertEq(address(subscription).balance, 0);
         
         vm.prank(user1);
         subscription.subscribeMonthly{value: MONTHLY_PRICE}();
         
-        assertEq(subscription.getBalance(), MONTHLY_PRICE);
+        assertEq(address(subscription).balance, MONTHLY_PRICE);
     }
     
     // ============ Fuzz Tests ============
@@ -224,7 +230,7 @@ contract HookLabSubscriptionTest is Test {
         subscription.subscribeMonthly{value: payment}();
         
         assertTrue(subscription.isPremium(user1));
-        assertEq(subscription.getBalance(), payment);
+        assertEq(address(subscription).balance, payment);
     }
     
     function testFuzz_IsPremium_AfterTimeWarp(uint256 timeWarp) public {

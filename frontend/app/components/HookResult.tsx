@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSendTransaction, useWaitForTransactionReceipt, useAccount, useSwitchChain, useChainId } from 'wagmi';
-import { foundry } from 'wagmi/chains';
-import { parseEther } from 'viem';
+import { useAccount, useSignMessage, useChainId, useSwitchChain } from 'wagmi';
 import toast from 'react-hot-toast';
+import TransactionModal from './TransactionModal';
 
 type Hook = {
   id: string;
@@ -32,48 +31,24 @@ export default function HookResult({ hook, onTryAnother, onBack, initialHistoryI
   const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
-  const [isPaying, setIsPaying] = useState(false);
-  const [paymentHash, setPaymentHash] = useState<`0x${string}` | undefined>(undefined);
-  const [generationIntent, setGenerationIntent] = useState<'image' | 'video'>('image');
 
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
-  const { data: hash, sendTransaction, isPending: isConfirmingWallet, error: sendError } = useSendTransaction();
+  const { signMessageAsync } = useSignMessage(); 
 
-  const { isLoading: isWaitingReceipt, isSuccess: isPaymentSuccess } = useWaitForTransactionReceipt({
-    hash: paymentHash,
-  });
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [activePaymentMode, setActivePaymentMode] = useState<'image' | 'video'>('image');
 
-  // Watch for transaction hash updates
-  useEffect(() => {
-    if (hash) {
-      setPaymentHash(hash);
-      setIsPaying(true);
-      toast.loading("Processing payment...", { id: "payment" });
+  // Modal Success Handler
+  const handlePaymentSuccess = () => {
+    setShowPaymentModal(false);
+    if (activePaymentMode === 'video') {
+      generateImageAndThenVideo();
+    } else {
+      generateImageAfterPayment();
     }
-  }, [hash]);
-
-  // Watch for errors
-  useEffect(() => {
-    if (sendError) {
-      toast.error("Payment rejected or failed");
-      setIsPaying(false);
-    }
-  }, [sendError]);
-
-  // Watch for payment success -> Trigger Generation
-  useEffect(() => {
-    if (isPaymentSuccess) {
-      toast.success("Payment confirmed! Starting generation...", { id: "payment" });
-      if (generationIntent === 'video') {
-        generateImageAndThenVideo();
-      } else {
-        generateImageAfterPayment();
-      }
-      setIsPaying(false);
-    }
-  }, [isPaymentSuccess]);
+  };
 
   // Generate hashtags (Dynamic based on topic)
   const hashtags = [`#${hook.topic.replace(/\s+/g, '')}`, '#Web3', '#HookLab', '#Farcaster'];
@@ -182,50 +157,22 @@ export default function HookResult({ hook, onTryAnother, onBack, initialHistoryI
     }
   };
 
-  const handleGenerateImage = async () => {
-    // Developer Mode: Bypass Payment & Wallet Connection
-    if (process.env.NEXT_PUBLIC_MOCK_PAYMENT === 'true') {
-      toast.success("Developer Mode: Payment Bypassed");
-      generateImageAfterPayment();
+  const handleGenerateImage = () => {
+    if (!isConnected) {
+      toast.error("Please connect wallet first");
       return;
     }
+    setActivePaymentMode('image');
+    setShowPaymentModal(true);
+  };
 
-    if (!isConnected || !address) {
-      toast.error("Please connect your wallet first!");
+  const handleGenerateVideoTrigger = () => {
+    if (!isConnected) {
+      toast.error("Please connect wallet first");
       return;
     }
-
-    // Auto-switch to Configured Network if wrong
-    const configuredChainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID || "31337");
-
-    if (chainId !== configuredChainId) {
-      try {
-        toast.loading(`Switching to network ID ${configuredChainId}...`, { duration: 2000 });
-        await switchChainAsync({ chainId: configuredChainId });
-      } catch (error) {
-        toast.error(`Failed to switch network. Please switch to chain ID ${configuredChainId} manually.`);
-        return;
-      }
-    }
-
-    if (generatedImageUrl) return;
-
-    const price = process.env.NEXT_PUBLIC_IMAGE_GENERATION_PRICE || "0.0001";
-    const receiver = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
-
-    if (!receiver) {
-      toast.error("Contract address config missing");
-      return;
-    }
-
-    try {
-      sendTransaction({
-        to: receiver,
-        value: parseEther(price),
-      });
-    } catch (e) {
-      console.error("Transaction failed to start", e);
-    }
+    setActivePaymentMode('video');
+    setShowPaymentModal(true);
   };
 
   const handleCopy = () => {
@@ -405,50 +352,43 @@ export default function HookResult({ hook, onTryAnother, onBack, initialHistoryI
 
             {/* Row 2: Visualize Options (Show both if nothing generated yet) */}
             {!generatedImageUrl && !generatedVideoUrl && (
-              <button
-                onClick={handleGenerateImage}
-                disabled={isGeneratingImage || isConfirmingWallet || isPaying || isWaitingReceipt}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] active:scale-[0.98]"
-              >
-                {isGeneratingImage ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Generating...
-                  </>
-                ) : isConfirmingWallet ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Confirm in Wallet...
-                  </>
-                ) : isPaying || isWaitingReceipt ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Processing Payment...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex gap-3 w-full">
+                <button
+                  onClick={handleGenerateImage}
+                  disabled={isGeneratingImage || isGeneratingVideo}
+                  className="flex-1 flex flex-col items-center justify-center gap-1 px-4 py-3 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 text-white rounded-2xl transition-all font-medium disabled:opacity-50 active:scale-[0.98] shadow-lg group"
+                >
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    Generate Visual ({process.env.NEXT_PUBLIC_MOCK_PAYMENT === 'true' ? 'Free / Dev' : '0.0001 ETH'})
-                  </>
-                )}
-              </button>
-            )}
-
-            {(isConfirmingWallet || isPaying || isWaitingReceipt) && !generatedImageUrl && (
-              <div className="w-full py-2 flex items-center justify-center gap-2 text-yellow-400 text-sm">
-                <div className="w-4 h-4 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
-                {isConfirmingWallet ? 'Confirm in Wallet...' : 'Processing Payment...'}
+                    <span>Image</span>
+                  </div>
+                  <span className="text-[10px] text-white/40 font-mono">0.0001 ETH</span>
+                </button>
+                
+                <button
+                  onClick={handleGenerateVideoTrigger}
+                  disabled={isGeneratingImage || isGeneratingVideo}
+                  className="flex-1 flex flex-col items-center justify-center gap-1 px-4 py-3 bg-linear-to-br from-indigo-600/20 to-blue-600/20 hover:from-indigo-600/30 hover:to-blue-600/30 backdrop-blur-md border border-indigo-500/30 text-white rounded-2xl transition-all font-medium disabled:opacity-50 active:scale-[0.98] shadow-lg shadow-indigo-500/10 group"
+                >
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    <span>Video</span>
+                  </div>
+                  <span className="text-[10px] text-indigo-400/60 font-mono">0.0005 ETH</span>
+                </button>
               </div>
             )}
 
-            {/* Row 3: Animate Video (Only if Image exists & Video doesn't) - Legacy option to upgrade */}
+            {/* Row 3: Animate Video (Only if Image exists & Video doesn't) */}
             {generatedImageUrl && !generatedVideoUrl && (
               <button
-                onClick={handleGenerateVideo}
+                onClick={handleGenerateVideoTrigger}
                 disabled={isGeneratingVideo}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] active:scale-[0.98]"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white rounded-xl transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.5)] active:scale-[0.98]"
               >
                 {isGeneratingVideo ? (
                   <>
@@ -461,11 +401,20 @@ export default function HookResult({ hook, onTryAnother, onBack, initialHistoryI
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Animate Image (Video)
+                    Animate Image (Video - 0.0005 ETH)
                   </>
                 )}
               </button>
             )}
+
+            {/* Payment Modal for Image/Video */}
+            <TransactionModal
+              isOpen={showPaymentModal}
+              onClose={() => setShowPaymentModal(false)}
+              onSuccess={handlePaymentSuccess}
+              hasCredits={false}
+              mode={activePaymentMode}
+            />
           </div>
         </div>
       </div>

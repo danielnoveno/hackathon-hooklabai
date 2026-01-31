@@ -8,7 +8,7 @@ export type UserData = {
 };
 
 const STORAGE_PREFIX = 'hooklab_user_';
-const INITIAL_CREDITS = 1000;
+const INITIAL_CREDITS = 5;
 
 export const userStorage = {
   // Get user data by address

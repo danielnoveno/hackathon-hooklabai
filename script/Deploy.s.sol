@@ -10,10 +10,12 @@ contract DeployScript is Script {
         
         vm.startBroadcast(deployerPrivateKey);
         
-        HookLabSubscription subscription = new HookLabSubscription();
+        address tokenAddress = vm.envAddress("NEXT_PUBLIC_TOKEN_ADDRESS");
+        HookLabSubscription subscription = new HookLabSubscription(tokenAddress);
         
         console.log("HookLabSubscription deployed to:", address(subscription));
-        console.log("Monthly price:", subscription.MONTHLY_PRICE());
+        console.log("ETH Price:", subscription.MONTHLY_PRICE_ETH());
+        console.log("HOOK Price:", subscription.MONTHLY_PRICE_HOOK());
         console.log("Month duration:", subscription.MONTH_DURATION());
         console.log("Owner:", subscription.owner());
         
