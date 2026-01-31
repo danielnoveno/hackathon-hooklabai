@@ -3,7 +3,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { SplitText as GSAPSplitText } from 'gsap/SplitText'; // HATI-HATI: SplitText adalah plugin CLUB GREENSOK (Berbayar). 
+// Removed unused GSAP SplitText import 
 // JIKA TIDAK PUNYA LISENSI CLUB GREENSOK, KITA PAKAI VERSI MANUAL SEDERHANA DI BAWAH INI.
 import { useGSAP } from '@gsap/react';
 

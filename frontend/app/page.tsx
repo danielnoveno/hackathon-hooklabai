@@ -16,6 +16,10 @@ import NameInputModal from './components/NameInputModal';
 import HooksSelection from './components/HookSelection';
 import TransactionModal from './components/TransactionModal';
 import HookResult from './components/HookResult';
+import Silk from './components/Silk';
+import DecryptedText from './components/DecryptedText';
+import BubbleMenu from './components/BubbleMenu';
+import HistoryModal from './components/HistoryModal';
 
 import { userStorage } from '../utils/userStorage';
 
