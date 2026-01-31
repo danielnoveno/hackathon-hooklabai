@@ -163,7 +163,7 @@ const SplitText: React.FC<SplitTextProps> = ({
       willChange: 'transform, opacity'
     };
     const classes = `split-parent overflow-hidden inline-block whitespace-normal ${className}`;
-    const Tag = (tag || 'p') as React.ElementType;
+    const Tag: any = tag || 'p';
 
     return (
       <Tag ref={ref} style={style} className={classes}>

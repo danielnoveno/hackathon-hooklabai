@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 
 type WalletConnectProps = {
@@ -12,6 +13,11 @@ export default function WalletConnect({ isConnected, showModal = false }: Wallet
   const [showWalletModal, setShowWalletModal] = useState(showModal);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const { connect, connectors, isPending } = useConnect();
   const { isConnected: accountConnected, address } = useAccount();
@@ -153,8 +159,8 @@ export default function WalletConnect({ isConnected, showModal = false }: Wallet
         </button>
 
         {/* MODAL: ACCOUNT INFO & DISCONNECT */}
-        {showWalletModal && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+        {showWalletModal && mounted && createPortal(
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="relative bg-[#0A0A0A] border border-white/10 rounded-[32px] p-6 w-full max-w-[320px] shadow-2xl flex flex-col items-center animate-in zoom-in-95 duration-200">
               
               {/* Close Button */}
@@ -206,7 +212,8 @@ export default function WalletConnect({ isConnected, showModal = false }: Wallet
               </div>
 
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </>
     );
@@ -240,8 +247,8 @@ export default function WalletConnect({ isConnected, showModal = false }: Wallet
       </button>
 
       {/* MODAL: SELECT WALLET */}
-      {showWalletModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+      {showWalletModal && mounted && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-[#0A0A0A] border border-white/10 rounded-[32px] p-6 w-full max-w-[340px] shadow-2xl animate-in zoom-in-95 duration-200 relative">
              <button
                 onClick={() => {
@@ -339,7 +346,8 @@ export default function WalletConnect({ isConnected, showModal = false }: Wallet
               By connecting, you agree to our Terms of Service
             </p>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
