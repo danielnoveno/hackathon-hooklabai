@@ -345,8 +345,8 @@ export default function HookResult({ hook, onTryAnother, onBack, initialHistoryI
                 onClick={handleShare}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl transition-all font-medium shadow-lg hover:shadow-blue-500/30 active:scale-[0.98]"
               >
-                <img src="https://warpcast.com/favicon.ico" alt="Base" className="w-5 h-5 rounded-full bg-white" />
-                Post on Base
+                
+                Post 
               </button>
             </div>
 

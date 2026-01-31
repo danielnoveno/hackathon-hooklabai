@@ -3,298 +3,328 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 0, 0, 0;
-  --background-end-rgb: 0, 0, 0;
+    --background: #0a0a0a;
+    --foreground: #ededed;
 }
 
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+html,
 body {
-  background: rgb(var(--background-start-rgb));
+    max-width: 100vw;
+    overflow-x: hidden;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: 'Inter', 'Poppins', Arial, Helvetica, sans-serif;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+a {
+    color: inherit;
+    text-decoration: none;
 }
 
-@keyframes fadeFloat {
-  0% {
-    opacity: 0;
-    transform: translateY(8px) scale(0.98);
-  }
-  40% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(-4px) scale(1);
-  }
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }
 
-.animate-fade-float {
-  animation: fadeFloat 6s ease-in-out infinite;
+::-webkit-scrollbar-track {
+    background: transparent;
 }
 
-@keyframes slowPulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.4;
-  }
-  50% {
-    transform: scale(1.15);
-    opacity: 0.6;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0.4;
-  }
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
 }
 
-.animate-slow-pulse {
-  animation: slowPulse 8s ease-in-out infinite;
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
-/* DOT MAP BACKGROUND */
-.bg-dot-map {
-  background-image: radial-gradient(
-    rgba(255, 255, 255, 0.5) 1px,
-    transparent 1px
-  );
-  background-size: 6px 6px;
+/* Selection */
+::selection {
+    background: rgba(37, 99, 235, 0.5);
+    color: white;
 }
 
-/* MAP MOVE */
-@keyframes mapMove {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-360px);
-  }
+/* Font imports */
+@font-face {
+    font-family: 'Poppins';
+    src: url('/fonts/Poppins-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
 }
 
-.animate-map-move {
-  animation: mapMove 18s linear infinite;
+@font-face {
+    font-family: 'Poppins';
+    src: url('/fonts/Poppins-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
 }
 
-/* DENSE DOT MAP */
-.bg-dot-map-dense {
-  background-image: radial-gradient(
-    rgba(168, 85, 247, 0.9) 1px,
-    transparent 1px
-  );
-  background-size: 4px 4px;
+@font-face {
+    font-family: 'Poppins';
+    src: url('/fonts/Poppins-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
 }
 
-/* SLOW MAP MOVE */
-@keyframes mapMoveSlow {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-240px);
-  }
+@font-face {
+    font-family: 'Poppins';
+    src: url('/fonts/Poppins-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
 }
 
-.animate-map-move-slow {
-  animation: mapMoveSlow 22s linear infinite;
+/* Utility Classes */
+.font-poppins {
+    font-family: 'Poppins', sans-serif;
 }
 
-/* FAST MAP MOVE (PARALLAX) */
-@keyframes mapMoveFast {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-420px);
-  }
+/* Animations */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
-.animate-map-move-fast {
-  animation: mapMoveFast 40s linear infinite;
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
 }
 
-/* MOBILE DOT MAP */
-.bg-dot-map-mobile {
-  background-image: radial-gradient(
-    rgba(168, 85, 247, 0.85) 1px,
-    transparent 1px
-  );
-  background-size: 3px 3px;
+.animate-spin {
+    animation: spin 1s linear infinite;
 }
 
-/* MOBILE MAP MOVE */
-@keyframes mapMoveMobile {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-35%);
-  }
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-.animate-map-move-mobile {
-  animation: mapMoveMobile 28s linear infinite;
+/* ========================================
+   DRIVER.JS CUSTOM THEME - HookLab Style
+   ======================================== */
+
+/* Overlay - Transparent as requested */
+.driver-overlay {
+    background: opacity(0) !important;
+    /* Fallback */
+    opacity: 0 !important;
 }
 
-/* PARALLAX SLOW */
-@keyframes mapMoveMobileSlow {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-15%);
-  }
+/* Main Popover Container - Compact Size */
+.driver-popover {
+    background: rgba(20, 25, 35, 0.98) !important;
+    border: 1px solid rgba(59, 130, 246, 0.2) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4) !important;
+    padding: 16px !important;
+    /* Reduced padding */
+    max-width: 280px !important;
+    /* Reduced width */
+    font-family: 'Poppins', 'Inter', sans-serif !important;
+    animation: popoverSlideIn 0.3s ease-out !important;
 }
 
-.animate-map-move-mobile-slow {
-  animation: mapMoveMobileSlow 50s linear infinite;
+@keyframes popoverSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
-/* globals.css - Tambahkan ke file CSS global Anda */
-
-/* Fade In Animation untuk Threads */
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Arrow styling */
+.driver-popover-arrow {
+    border: 1px solid rgba(59, 130, 246, 0.2) !important;
 }
 
-.animate-fade-in {
-  animation: fade-in 0.4s ease-out forwards;
+.driver-popover-arrow-side-left,
+.driver-popover-arrow-side-right,
+.driver-popover-arrow-side-top,
+.driver-popover-arrow-side-bottom {
+    background: rgba(20, 25, 35, 0.98) !important;
 }
 
-/* Pop In Up Animation - Dynamic Entrance */
-@keyframes pop-in-up {
-  0% {
-    opacity: 0;
-    transform: translateY(40px) scale(0.9);
-  }
-  70% {
-    opacity: 1;
-    transform: translateY(-5px) scale(1.02);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+/* Title - Compact */
+.driver-popover-title {
+    font-size: 0.95rem !important;
+    /* Smaller title */
+    font-weight: 600 !important;
+    color: #60a5fa !important;
+    margin-bottom: 6px !important;
+    line-height: 1.3 !important;
+}
+
+/* Description text - Compact */
+.driver-popover-description {
+    color: rgba(226, 232, 240, 0.9) !important;
+    font-size: 0.8rem !important;
+    /* Smaller text */
+    line-height: 1.5 !important;
+    font-weight: 400 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Progress indicator */
+.driver-popover-progress-text {
+    color: rgba(148, 163, 184, 0.8) !important;
+    font-size: 0.7rem !important;
+    /* Smaller */
+    font-weight: 500 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+}
+
+/* Footer container - Compact */
+.driver-popover-footer {
+    margin-top: 12px !important;
+    /* Reduced margin */
+    padding-top: 10px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+}
+
+/* All buttons base style - No Shadows */
+.driver-popover-footer button {
+    font-family: 'Poppins', 'Inter', sans-serif !important;
+    font-weight: 500 !important;
+    /* Reduced weigh slightly for cleaner look */
+    font-size: 0.85rem !important;
+    padding: 8px 16px !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    /* Removed box shadow */
+    text-shadow: none !important;
+    /* Removed text shadow */
+}
+
+/* Previous button - Ghost style */
+.driver-popover-prev-btn {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: rgba(203, 213, 225, 0.9) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.driver-popover-prev-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    transform: translateX(-2px) !important;
+}
+
+/* Next/Done button - Simple blue */
+.driver-popover-next-btn {
+    background: #2563eb !important;
+    color: white !important;
+}
+
+.driver-popover-next-btn:hover {
+    background: #3b82f6 !important;
+}
+
+.driver-popover-next-btn:active {
+    transform: scale(0.98) !important;
+}
+
+/* Close button */
+.driver-popover-close-btn {
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: rgba(148, 163, 184, 0.8) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+    font-size: 1.25rem !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+}
+
+.driver-popover-close-btn:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+    color: #f87171 !important;
+    transform: rotate(90deg) !important;
+}
+
+/* Highlighted element - Brighter Clean Border */
+.driver-active-element {
+    box-shadow: 0 0 0 2px #3b82f6 !important;
+    /* Solid bright blue, no alpha */
+    border-radius: 12px !important;
+    background-color: rgba(59, 130, 246, 0.1) !important;
+    /* Slight tint to indicate active area */
+}
+
+/* Remove pulse animation for cleaner look */
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+    .driver-popover {
+        max-width: calc(100vw - 32px) !important;
+        margin: 0 16px !important;
+        padding: 20px !important;
+    }
+
+    .driver-popover-title {
+        font-size: 1rem !important;
+    }
+
+    .driver-popover-description {
+        font-size: 0.85rem !important;
+    }
+
+    .driver-popover-footer button {
+        padding: 8px 16px !important;
+        font-size: 0.8rem !important;
+    }
+}
+
+/* Custom Animation for Components */
+@keyframes popInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .animate-pop-in-up {
-  animation: pop-in-up 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-}
-
-/* Custom Scrollbar untuk Threads Feed */
-.overflow-y-auto::-webkit-scrollbar {
-  width: 6px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb {
-  background: rgba(59, 130, 246, 0.5);
-  border-radius: 10px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 130, 246, 0.7);
-}
-
-/* Smooth Transitions */
-* {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Loading State */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
-  }
-}
-
-.pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-
-
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-  }
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-  }
-}
-
-
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+    animation: popInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
