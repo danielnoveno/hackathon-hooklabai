@@ -10,7 +10,7 @@ interface FAQItem {
 
 const faqData: FAQItem[] = [
     {
-        question: "Do I need to buy ETH to start?",
+        question: "Do I need to buy IDRX to start?",
         answer: "No! We use Smart Wallets for a gas-less onboarding for your first 5 credits."
     },
     {

@@ -51,7 +51,7 @@ export default function HookResult({ hook, onTryAnother, onBack, initialHistoryI
   };
 
   // Generate hashtags (Dynamic based on topic)
-  const hashtags = [`#${hook.topic.replace(/\s+/g, '')}`, '#Web3', '#HookLab', '#Farcaster'];
+  const hashtags = [`#${hook.topic.replace(/\s+/g, '')}`, '#Web3', '#IDRX', '#Farcaster'];
 
   const generateImageAfterPayment = async (): Promise<string | null> => {
     setIsGeneratingImage(true);
@@ -364,7 +364,7 @@ export default function HookResult({ hook, onTryAnother, onBack, initialHistoryI
                     </svg>
                     <span>Image</span>
                   </div>
-                  <span className="text-[10px] text-white/40 font-mono">0.0001 ETH</span>
+                  <span className="text-[10px] text-white/40 font-mono">10 IDRX</span>
                 </button>
                 
                 <button
@@ -378,7 +378,7 @@ export default function HookResult({ hook, onTryAnother, onBack, initialHistoryI
                     </svg>
                     <span>Video</span>
                   </div>
-                  <span className="text-[10px] text-indigo-400/60 font-mono">0.0005 ETH</span>
+                  <span className="text-[10px] text-indigo-400/60 font-mono">50 IDRX</span>
                 </button>
               </div>
             )}
@@ -401,7 +401,7 @@ export default function HookResult({ hook, onTryAnother, onBack, initialHistoryI
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Animate Image (Video - 0.0005 ETH)
+                    Animate Image (Video - 50 IDRX)
                   </>
                 )}
               </button>

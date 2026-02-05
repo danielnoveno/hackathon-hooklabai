@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSignMessage, useSwitchChain, useChainId, useReadContract, useBalance, useSendTransaction } from 'wagmi';
 import { parseEther, formatEther } from 'viem';
-import { HOOKLAB_SUBSCRIPTION_ABI, HOOK_TOKEN_ABI } from '../config/abi';
+import { HOOKLAB_SUBSCRIPTION_ABI, IDRX_TOKEN_ABI } from '../config/abi';
 import toast from 'react-hot-toast';
 
 type TransactionModalProps = {
@@ -23,7 +23,6 @@ export default function TransactionModal({
 }: TransactionModalProps) {
   const { address } = useAccount();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'eth' | 'hook'>('eth');
 
   const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
   const tokenAddress = process.env.NEXT_PUBLIC_TOKEN_ADDRESS as `0x${string}`;
@@ -31,14 +30,12 @@ export default function TransactionModal({
 
   // Prices
   const prices = {
-    subscription: { eth: '0.001', hook: '500' },
+    subscription: { idrx: '500' },
     image: { 
-      eth: process.env.NEXT_PUBLIC_IMAGE_PRICE_ETH || '0.0001', 
-      hook: process.env.NEXT_PUBLIC_IMAGE_PRICE_HOOK || '10' 
+      idrx: process.env.NEXT_PUBLIC_IMAGE_PRICE_IDRX || '10' 
     },
     video: { 
-      eth: process.env.NEXT_PUBLIC_VIDEO_PRICE_ETH || '0.0005', 
-      hook: process.env.NEXT_PUBLIC_VIDEO_PRICE_HOOK || '50' 
+      idrx: process.env.NEXT_PUBLIC_VIDEO_PRICE_IDRX || '50' 
     }
   };
 
@@ -50,23 +47,18 @@ export default function TransactionModal({
 
   // CONTRACT WRITES
   const { data: hash, writeContract, reset, isPending, error: writeError } = useWriteContract();
-  const { sendTransaction, data: txHash } = useSendTransaction();
 
   // READS
-  const { data: hookBalance } = useReadContract({
+  const { data: idrxBalance } = useReadContract({
     address: tokenAddress,
-    abi: HOOK_TOKEN_ABI,
+    abi: IDRX_TOKEN_ABI,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
   });
   
-  const { data: ethBalance } = useBalance({
-    address: address,
-  });
-
   const { data: allowance } = useReadContract({
     address: tokenAddress,
-    abi: HOOK_TOKEN_ABI,
+    abi: IDRX_TOKEN_ABI,
     functionName: 'allowance',
     args: address ? [address, contractAddress] : undefined,
   });
@@ -94,6 +86,8 @@ export default function TransactionModal({
   useEffect(() => {
     if (writeError) {
       setIsProcessing(false);
+      console.error("Contract Write Error:", writeError);
+
       const isUserReject = writeError.message?.toLowerCase().includes('user rejected') || 
                           writeError.message?.toLowerCase().includes('user denied');
       
@@ -102,7 +96,7 @@ export default function TransactionModal({
       } else {
         toast.error(writeError.message || "Execution failed", { id: 'tx-status' });
       }
-      toast.dismiss('tx-status');
+      // Removed immediate toast.dismiss('tx-status') to allow user to read the message
     }
   }, [writeError]);
 
@@ -125,61 +119,43 @@ export default function TransactionModal({
         setIsProcessing(false);
         onSuccess();
       } else {
-        const priceEth = parseEther(currentPrice.eth);
-        const priceHook = parseEther(currentPrice.hook);
+        const priceIdrx = parseEther(currentPrice.idrx);
 
-        if (paymentMethod === 'eth') {
-          if (mode === 'subscription') {
+        // IDRX TOKEN FLOW
+        if (!idrxBalance || idrxBalance < priceIdrx) {
+          toast.error(`Insufficient $IDRX balance (Need ${currentPrice.idrx})`);
+          setIsProcessing(false);
+          return;
+        }
+
+        if (mode === 'subscription') {
+          // Check Allowance for contract
+          if (!allowance || allowance < priceIdrx) {
+            toast.loading("Approving $IDRX...", { id: 'tx-status' });
             writeContract({
-              address: contractAddress,
-              abi: HOOKLAB_SUBSCRIPTION_ABI,
-              functionName: 'subscribeMonthly',
-              value: priceEth,
+              address: tokenAddress,
+              abi: IDRX_TOKEN_ABI,
+              functionName: 'approve',
+              args: [contractAddress, priceIdrx * BigInt(10)], 
             });
-          } else {
-            // Direct transfer for Image/Video
-            sendTransaction({
-              to: devAddress,
-              value: priceEth,
-            });
-          }
-        } else {
-          // HOOK TOKEN FLOW
-          if (!hookBalance || hookBalance < priceHook) {
-            toast.error(`Insufficient $HOOK balance (Need ${currentPrice.hook})`);
-            setIsProcessing(false);
             return;
           }
 
-          if (mode === 'subscription') {
-            // Check Allowance for contract
-            if (!allowance || allowance < priceHook) {
-              toast.loading("Approving $HOOK...", { id: 'tx-status' });
-              writeContract({
-                address: tokenAddress,
-                abi: HOOK_TOKEN_ABI,
-                functionName: 'approve',
-                args: [contractAddress, priceHook * BigInt(10)], 
-              });
-              return;
-            }
-
-            toast.loading("Subscribing with $HOOK...", { id: 'tx-status' });
-            writeContract({
-              address: contractAddress,
-              abi: HOOKLAB_SUBSCRIPTION_ABI,
-              functionName: 'subscribeWithToken',
-            });
-          } else {
-            // Direct transfer for Image/Video
-            toast.loading(`Paying for ${mode}...`, { id: 'tx-status' });
-            writeContract({
-              address: tokenAddress,
-              abi: HOOK_TOKEN_ABI,
-              functionName: 'transfer',
-              args: [devAddress, priceHook],
-            });
-          }
+          toast.loading("Subscribing with $IDRX...", { id: 'tx-status' });
+          writeContract({
+            address: contractAddress,
+            abi: HOOKLAB_SUBSCRIPTION_ABI,
+            functionName: 'subscribeWithToken',
+          });
+        } else {
+          // Direct transfer for Image/Video
+          toast.loading(`Paying for ${mode}...`, { id: 'tx-status' });
+          writeContract({
+            address: tokenAddress,
+            abi: IDRX_TOKEN_ABI,
+            functionName: 'transfer',
+            args: [devAddress, priceIdrx],
+          });
         }
       }
     } catch (err) {
@@ -203,7 +179,7 @@ export default function TransactionModal({
                 {mode === 'image' ? 'Generate Image' : mode === 'video' ? 'Generate Video' : 'Confirm Access'}
               </h3>
               <p className="text-white/40 text-sm">
-                {hasCredits ? 'Sign to use 1 credit' : 'Payment Required'}
+                IDRX Payment Required
               </p>
             </div>
             {!isProcessing && !isConfirming && (
@@ -215,39 +191,11 @@ export default function TransactionModal({
             )}
           </div>
 
-          {!hasCredits && (
-            <div className="mb-6">
-              <div className="flex gap-2 p-1 bg-white/5 rounded-2xl mb-3">
-                <button
-                  onClick={() => setPaymentMethod('eth')}
-                  className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all ${paymentMethod === 'eth' ? 'bg-blue-600 text-white shadow-lg' : 'text-white/40 hover:text-white'}`}
-                >
-                  Native ETH
-                </button>
-                <button
-                  onClick={() => setPaymentMethod('hook')}
-                  className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all ${paymentMethod === 'hook' ? 'bg-indigo-600 text-white shadow-lg' : 'text-white/40 hover:text-white'}`}
-                >
-                  $HOOK Token
-                </button>
-              </div>
-              
-              {paymentMethod === 'eth' && (
-                <div className="flex items-center gap-2 px-3 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl animate-in fade-in slide-in-from-top-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-                  <p className="text-[10px] text-indigo-300 font-medium">
-                    Loyalty Reward: Get <span className="font-bold">100 $HOOK</span> back!
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
           <div className="bg-white/5 rounded-2xl p-4 mb-6 border border-white/5">
             <div className="flex items-center justify-between mb-3 text-sm">
               <span className="text-white/40 font-medium">Amount</span>
               <span className="text-white font-bold text-lg tracking-wide text-right">
-                {hasCredits ? '1 Credit' : paymentMethod === 'eth' ? `${currentPrice.eth} ETH` : `${currentPrice.hook} HOOK`}
+                {hasCredits ? '1 Credit' : `${currentPrice.idrx} IDRX`}
               </span>
             </div>
             
@@ -265,14 +213,12 @@ export default function TransactionModal({
                 <span className="text-white/40 text-xs">Your Balance</span>
                 <div className="flex flex-col items-end gap-1 text-right">
                   <span className="text-white/80 text-xs font-mono font-bold">
-                    {paymentMethod === 'eth' 
-                      ? (ethBalance ? `${Number(ethBalance.formatted).toFixed(4)} ETH` : 'Loading...') 
-                      : (hookBalance !== undefined ? `${Number(formatEther(hookBalance)).toFixed(0)} $HOOK` : 'Loading...')}
+                    {idrxBalance !== undefined ? `${Number(formatEther(idrxBalance)).toFixed(0)} $IDRX` : 'Loading...'}
                   </span>
                   {!hasCredits && (
                     <div className="flex flex-col items-end gap-0.5">
                       <p className="text-[9px] text-white/20 italic max-w-[150px]">
-                        {paymentMethod === 'eth' ? 'Native Base Sepolia' : '$HOOK Loyalty Rewards'}
+                        $IDRX Loyalty Rewards
                       </p>
                       <p className="text-[8px] text-white/10">Progress persists on-chain</p>
                     </div>
@@ -285,11 +231,7 @@ export default function TransactionModal({
           <button
             onClick={handleTransaction}
             disabled={isProcessing || isPending || isConfirming}
-            className={`w-full py-4 rounded-2xl font-bold text-white transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl ${
-              paymentMethod === 'eth' 
-                ? 'bg-gradient-to-r from-blue-600 to-blue-500 shadow-blue-900/20' 
-                : 'bg-gradient-to-r from-indigo-600 to-indigo-500 shadow-indigo-900/20'
-            }`}
+            className="w-full py-4 rounded-2xl font-bold text-white transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl bg-gradient-to-r from-indigo-600 to-indigo-500 shadow-indigo-900/20"
           >
             {isProcessing || isPending || isConfirming ? (
               <div className="flex items-center justify-center gap-2">
@@ -299,7 +241,7 @@ export default function TransactionModal({
             ) : hasCredits ? (
               'Confirm Selection'
             ) : (
-              paymentMethod === 'hook' && (!allowance || allowance < parseEther('500')) ? 'Approve $HOOK' : 'Pay & Continue'
+              (idrxBalance === undefined || idrxBalance < parseEther(currentPrice.idrx)) ? 'Insufficient $IDRX' : (!allowance || allowance < parseEther('500')) ? 'Approve $IDRX' : 'Pay & Continue'
             )}
           </button>
           

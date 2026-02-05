@@ -7,7 +7,7 @@ import { useAccount, useSendTransaction, useWaitForTransactionReceipt, useSwitch
 import { parseEther } from 'viem';
 import toast from 'react-hot-toast';
 import { formatEther } from 'viem';
-import { HOOK_TOKEN_ABI } from './config/abi';
+import { IDRX_TOKEN_ABI } from './config/abi';
 
 // IMPORT DRIVER.JS
 import { driver } from "driver.js";
@@ -126,10 +126,10 @@ export default function Home() {
   const tokenAddress = process.env.NEXT_PUBLIC_TOKEN_ADDRESS as `0x${string}`;
   const rewardsAddress = process.env.NEXT_PUBLIC_REWARDS_ADDRESS as `0x${string}`;
 
-  // TOKEN HOOKS
-  const { data: hookBalance, refetch: refetchBalance } = useReadContract({
+  // TOKEN IDRX
+  const { data: idrxBalance, refetch: refetchBalance } = useReadContract({
     address: tokenAddress,
-    abi: HOOK_TOKEN_ABI,
+    abi: IDRX_TOKEN_ABI,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
   });
@@ -574,9 +574,9 @@ export default function Home() {
                         <span className="text-[10px] text-white/30 font-medium italic truncate">Persists on-chain</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[8px] text-white/20 uppercase tracking-tighter">1 Pay = 100 HOOK</span>
+                        <span className="text-[8px] text-white/20 uppercase tracking-tighter">1 Pay = 100 IDRX</span>
                         <span className="text-sm font-mono font-bold text-indigo-400">
-                          {Number(formatEther(hookBalance || 0n)).toFixed(0)}/500 $HOOK
+                          {Number(formatEther(idrxBalance || 0n)).toFixed(0)}/500 $IDRX
                         </span>
                       </div>
 
@@ -862,7 +862,7 @@ function HookResult({ hook, onTryAnother, onBack, initialHistoryId }: HookResult
     if (generatedImageUrl && generationIntent === 'image') return;
 
     const price = process.env.NEXT_PUBLIC_IMAGE_GENERATION_PRICE || "0.0001";
-    // Change to Developer Address to receive ETH payments
+    // Change to Developer Address to receive IDRX payments
     const receiver = process.env.NEXT_PUBLIC_DEVELOPER_ADDRESS as `0x${string}`;
 
     if (!receiver) {
